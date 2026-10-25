@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edit-reel"
+version = "1.0.0"
+description = "Autonomous AI Video Editor for Instagram Reels & TikTok — Signature Tactile 'Paper & Objects' Editorial Aesthetic for Antigravity, Claude Code, Cursor, & Codex"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Mohammed Mhaidra"}
+]
+keywords = [
+    "video-editing",
+    "instagram-reels",
+    "tiktok",
+    "ai-video-editor",
+    "antigravity",
+    "claude-code",
+    "cursor",
+    "agentic-ai",
+    "mediapipe",
+    "faster-whisper",
+    "motion-graphics"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Graphics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
+    "opencv-python-headless>=4.8.0",
+    "mediapipe>=0.10.14",
+    "faster-whisper>=1.0.0",
+    "python-docx>=1.1.0",
+    "tqdm>=4.66.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/MMhaidra/edit-reel"
+Repository = "https://github.com/MMhaidra/edit-reel"
+Issues = "https://github.com/MMhaidra/edit-reel/issues"
+
+[project.scripts]
+edit-reel = "scripts.pipeline:main"

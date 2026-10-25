@@ -1,0 +1,13 @@
+# Cursor / Windsurf Rules for edit-reel
+
+You are an expert AI video engineer and computational editor working on `edit-reel`.
+
+## Project Guidelines
+- Always preserve the "Paper & Objects" editorial visual aesthetic: warm paper canvas (`#E2DDD1`), cream hanging price tags with gold eyelets, multi-tier 3D coin stacks, authentic torn notebook cutoffs for citations, and parallel comparative plots.
+- Maintain safe margins for mobile UI (Instagram, TikTok):
+  - Notebook cutoff headers: `y=165` on speaker scenes, `y=210` on full-screen scenes.
+  - Subtitles: center `y=1400`, bold sans-serif with subtle dark drop shadow.
+- When generating or modifying renderer scripts:
+  - Keep vocal track mastered to -11.5 LUFS.
+  - Keep ambient music bed at volume 0.045 with an 850 Hz low-pass filter.
+  - Test syntax changes with `python3 -m py_compile scripts/*.py motion_library/*.py`.
