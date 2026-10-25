@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-10-25T12:00:00.000000",
+  "pool_a_initial_usd": 50.00,
+  "pool_b_initial_usd": 100.00,
+  "total_reels_processed": 0,
+  "cumulative_tokens_prompt": 0,
+  "cumulative_tokens_output": 0,
+  "cumulative_ranker_queries": 0,
+  "cumulative_cost_usd": 0.0,
+  "history": []
+}

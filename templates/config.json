@@ -1,0 +1,44 @@
+{
+  "project_name": "reel-auto-editor",
+  "aspect_ratio": {
+    "width": 1080,
+    "height": 1920,
+    "target": "9:16"
+  },
+  "silence_removal": {
+    "noise_threshold_db": -30.0,
+    "min_silence_seconds": 0.45,
+    "pad_start_seconds": 0.08,
+    "pad_end_seconds": 0.12,
+    "min_speech_gap_seconds": 0.25
+  },
+  "safe_zones": {
+    "top_header_margin": 220,
+    "bottom_caption_margin": 420,
+    "right_action_buttons_margin": 140,
+    "animation_stage": {
+      "x": "center",
+      "y": 220,
+      "width": 900,
+      "height": 480
+    }
+  },
+  "audio_mastering": {
+    "target_lufs": -14.0,
+    "true_peak": -1.5,
+    "standard": "EBU R128"
+  },
+  "languages": {
+    "english": {
+      "font": "Montserrat Black",
+      "active_color": "&H0000E6FF&",
+      "primary_color": "&H00FFFFFF&"
+    },
+    "moroccan_darija": {
+      "default_script": "arabizi",
+      "font": "Rubik ExtraBold",
+      "active_color": "&H0000FFA3&",
+      "primary_color": "&H00FFFFFF&"
+    }
+  }
+}
