@@ -7,10 +7,10 @@ demonstrating the autonomous pipeline flow from raw video to master reel deliver
 
 import math
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 
-W, H = 1080, 500
+W, H = 1140, 500
 FPS = 25
 DURATION_SEC = 3.6
 NUM_FRAMES = int(FPS * DURATION_SEC)  # 90 frames
@@ -22,7 +22,7 @@ TEXT_MAIN = (240, 246, 252)    # #F0F6FC
 TEXT_MUTED = (139, 148, 158)   # #8B949E
 LINE_DEFAULT = (40, 46, 54)
 
-# 6 Balanced Stages in an S-loop
+# 6 Balanced Stages with wide cards and dynamic pill sizing
 STAGES = [
     {
         "id": "01",
@@ -31,7 +31,7 @@ STAGES = [
         "script": "detect_cuts.py (discover)",
         "desc": "Video (.MP4/.MOV) + Script (.docx/.txt)",
         "color": (59, 130, 246),      # Electric Blue #3B82F6
-        "x": 195, "y": 150, "w": 260, "h": 105
+        "x": 210, "y": 145, "w": 300, "h": 110
     },
     {
         "id": "02",
@@ -40,7 +40,7 @@ STAGES = [
         "script": "transcribe_align.py + detect_cuts.py",
         "desc": "Whisper word boundaries + anti-arm cutoff",
         "color": (6, 182, 212),       # Bright Cyan #06B6D4
-        "x": 540, "y": 150, "w": 270, "h": 105
+        "x": 570, "y": 145, "w": 300, "h": 110
     },
     {
         "id": "03",
@@ -49,7 +49,7 @@ STAGES = [
         "script": "storyboard_planner.py",
         "desc": "Studio Cam A/B -> Cutout -> Full Infographic",
         "color": (168, 85, 247),      # Vivid Violet #A855F7
-        "x": 885, "y": 150, "w": 260, "h": 105
+        "x": 930, "y": 145, "w": 300, "h": 110
     },
     {
         "id": "04",
@@ -58,7 +58,7 @@ STAGES = [
         "script": "paper_objects.py + selfie_segmenter",
         "desc": "Warm paper #E2DDD1, tags, coins, notebook slips",
         "color": (245, 158, 11),      # Warm Amber / Gold #F59E0B
-        "x": 885, "y": 375, "w": 260, "h": 105
+        "x": 930, "y": 370, "w": 300, "h": 110
     },
     {
         "id": "05",
@@ -67,7 +67,7 @@ STAGES = [
         "script": "FFmpeg Vocal Chain + loudnorm",
         "desc": "-11.5 LUFS dialogue, 0.045 bed, motion SFX",
         "color": (16, 185, 129),      # Mint Green #10B981
-        "x": 540, "y": 375, "w": 270, "h": 105
+        "x": 570, "y": 370, "w": 300, "h": 110
     },
     {
         "id": "06",
@@ -76,7 +76,7 @@ STAGES = [
         "script": "render_reel.py",
         "desc": "1080x1920 MP4 production output",
         "color": (236, 72, 153),      # Pink / Magenta #EC4899
-        "x": 195, "y": 375, "w": 260, "h": 105
+        "x": 210, "y": 370, "w": 300, "h": 110
     }
 ]
 
@@ -100,27 +100,27 @@ def get_connection_path():
     path = []
     # 1 -> 2 (rightward)
     for t in np.linspace(0, 1, 35):
-        path.append((195 + (540 - 195) * t, 150))
+        path.append((210 + (570 - 210) * t, 145))
     # 2 -> 3 (rightward)
     for t in np.linspace(0, 1, 35):
-        path.append((540 + (885 - 540) * t, 150))
+        path.append((570 + (930 - 570) * t, 145))
     # 3 -> 4 (clockwise curve down on the right)
     for t in np.linspace(0, 1, 40):
         angle = -math.pi / 2 + math.pi * t
-        cx, cy = 885, (150 + 375) / 2
-        rx, ry = 80, (375 - 150) / 2
+        cx, cy = 930, (145 + 370) / 2
+        rx, ry = 80, (370 - 145) / 2
         path.append((cx + rx * math.cos(angle), cy + ry * math.sin(angle)))
     # 4 -> 5 (leftward)
     for t in np.linspace(0, 1, 35):
-        path.append((885 - (885 - 540) * t, 375))
+        path.append((930 - (930 - 570) * t, 370))
     # 5 -> 6 (leftward)
     for t in np.linspace(0, 1, 35):
-        path.append((540 - (540 - 195) * t, 375))
+        path.append((570 - (570 - 210) * t, 370))
     # 6 -> 1 (clockwise curve up on the left)
     for t in np.linspace(0, 1, 40):
         angle = math.pi / 2 + math.pi * t
-        cx, cy = 195, (150 + 375) / 2
-        rx, ry = 80, (375 - 150) / 2
+        cx, cy = 210, (145 + 370) / 2
+        rx, ry = 80, (370 - 145) / 2
         path.append((cx + rx * math.cos(angle), cy + ry * math.sin(angle)))
     return path
 
@@ -132,8 +132,8 @@ def render_frame(frame_idx):
     draw = ImageDraw.Draw(im)
 
     # Top header bar
-    draw.text((45, 22), "AUTONOMOUS EDITORIAL PIPELINE FLOW", fill=(255, 255, 255), font=font_header)
-    draw.text((45, 46), "Continuous Zero-Interaction Loop: Raw Footage -> Perception -> 3-State Rhythm -> Physical Objects -> Audio -> Delivery", fill=TEXT_MUTED, font=font_tagline)
+    draw.text((45, 20), "AUTONOMOUS EDITORIAL PIPELINE FLOW", fill=(255, 255, 255), font=font_header)
+    draw.text((45, 44), "Continuous Zero-Interaction Loop: Raw Footage -> Perception -> 3-State Rhythm -> Physical Objects -> Audio -> Delivery", fill=TEXT_MUTED, font=font_tagline)
 
     # Calculate active progress through the 6 stages (0.0 to 6.0)
     progress = (frame_idx / NUM_FRAMES) * 6.0
@@ -148,17 +148,17 @@ def render_frame(frame_idx):
 
     # Directional arrow indicators on the track
     # 1 -> 2
-    draw.polygon([(365, 146), (375, 150), (365, 154)], fill=(60, 68, 77))
+    draw.polygon([(385, 141), (397, 145), (385, 149)], fill=(65, 74, 85))
     # 2 -> 3
-    draw.polygon([(710, 146), (720, 150), (710, 154)], fill=(60, 68, 77))
+    draw.polygon([(745, 141), (757, 145), (745, 149)], fill=(65, 74, 85))
     # 3 -> 4
-    draw.polygon([(968, 260), (965, 272), (962, 260)], fill=(60, 68, 77))
+    draw.polygon([(1014, 252), (1010, 264), (1006, 252)], fill=(65, 74, 85))
     # 4 -> 5
-    draw.polygon([(715, 371), (705, 375), (715, 379)], fill=(60, 68, 77))
+    draw.polygon([(755, 366), (743, 370), (755, 374)], fill=(65, 74, 85))
     # 5 -> 6
-    draw.polygon([(370, 371), (360, 375), (370, 379)], fill=(60, 68, 77))
+    draw.polygon([(395, 366), (383, 370), (395, 374)], fill=(65, 74, 85))
     # 6 -> 1
-    draw.polygon([(112, 265), (115, 253), (118, 265)], fill=(60, 68, 77))
+    draw.polygon([(126, 262), (130, 250), (134, 262)], fill=(65, 74, 85))
 
     # Energetic trailing particle comet moving along the path
     path_pos = int((frame_idx / NUM_FRAMES) * TOTAL_PATH_LEN) % TOTAL_PATH_LEN
@@ -217,18 +217,23 @@ def render_frame(frame_idx):
         # Card body
         draw_rounded_rect(draw, [bx0, by0, bx1, by1], fill=card_fill, outline=border_col, width=border_w, radius=10)
 
-        # Stage number pill
-        pill_w, pill_h = 100, 18
-        pill_x = bx0 + 12
-        pill_y = by0 + 11
+        # Dynamic Stage Number Pill (measures text width to cover 100% of badge string)
+        badge_text = f"{st['id']} | {st['badge']}"
+        bbox_b = font_badge.getbbox(badge_text)
+        badge_text_w = bbox_b[2] - bbox_b[0]
+        pill_w = badge_text_w + 16  # generous 8px padding on each side
+        pill_h = 20
+        pill_x = bx0 + 14
+        pill_y = by0 + 12
+
         pill_bg = col if is_active else (33, 38, 45)
         pill_txt_col = (255, 255, 255) if is_active else (139, 148, 158)
         draw_rounded_rect(draw, [pill_x, pill_y, pill_x + pill_w, pill_y + pill_h], fill=pill_bg, radius=4)
-        draw.text((pill_x + 6, pill_y + 3), f"{st['id']} | {st['badge']}", fill=pill_txt_col, font=font_badge)
+        draw.text((pill_x + 8, pill_y + 4), badge_text, fill=pill_txt_col, font=font_badge)
 
         # Status indicator dot
         dot_x = bx1 - 18
-        dot_y = by0 + 20
+        dot_y = by0 + 22
         dot_col = col if is_active else (48, 54, 61)
         draw.ellipse([dot_x - 4, dot_y - 4, dot_x + 4, dot_y + 4], fill=dot_col)
         if is_active:
@@ -237,9 +242,9 @@ def render_frame(frame_idx):
 
         # Titles and description
         title_col = (255, 255, 255) if is_active else TEXT_MAIN
-        draw.text((bx0 + 12, by0 + 36), st["title"], fill=title_col, font=font_title)
-        draw.text((bx0 + 12, by0 + 58), st["script"], fill=st["color"] if is_active else (88, 166, 255), font=font_sub)
-        draw.text((bx0 + 12, by0 + 78), st["desc"], fill=TEXT_MUTED, font=font_detail)
+        draw.text((bx0 + 14, by0 + 38), st["title"], fill=title_col, font=font_title)
+        draw.text((bx0 + 14, by0 + 60), st["script"], fill=st["color"] if is_active else (88, 166, 255), font=font_sub)
+        draw.text((bx0 + 14, by0 + 80), st["desc"], fill=TEXT_MUTED, font=font_detail)
 
     return im
 

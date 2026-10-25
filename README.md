@@ -322,10 +322,6 @@ The end-to-end autonomous pipeline continuously executes through six discrete st
 | **05** | `FFmpeg Vocal Chain` | Applies adaptive spectral denoising, 85Hz highpass gate, -11.5 LUFS loudness, and motion SFX |
 | **06** | `render_reel.py` | Exports the production-ready 1080x1920 9:16 vertical reel autonomously |
 
-<p align="center">
-  <img src="assets/architecture.svg" alt="edit-reel 3-State Architectural Overview" width="100%" />
-</p>
-
 ---
 
 ## Customization (Make It Yours)
