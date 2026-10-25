@@ -43,7 +43,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/architecture.svg" alt="edit-reel Architectural Flow" width="100%" />
+  <img src="assets/pipeline_flow.gif" alt="edit-reel Autonomous Looping Flowchart" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);" />
 </p>
 
 ## Problem and Solution
@@ -311,34 +311,20 @@ Final Mastered Multi-Track Audio (.MP4)
 
 ## Pipeline Architecture
 
-```mermaid
-flowchart TD
-    A["Raw Video (.MP4 / .MOV)"] --> B["Cutter (detect_cuts.py)"]
-    S["Companion Script (.txt / .docx)"] --> C["Monotonic Forced Aligner (transcribe_align.py)"]
-    
-    B --> D["Speech-Protected Cut Video"]
-    C --> E["Time-Synchronized Words and Milestones"]
-    
-    D & E --> F["Storyboard Planner (storyboard_planner.py)"]
-    
-    F --> G1["State 1: Real Studio Cam A/B"]
-    F --> G2["State 2: Lowered Cutout on Paper"]
-    F --> G3["State 3: Full-Screen Infographics"]
-    
-    G2 --> H["MediaPipe Person Segmenter (selfie_segmenter.tflite)"]
-    
-    G1 & G2 & G3 --> I["Physical Objects Engine (paper_objects.py)"]
-    I --> J["Compositor and Master Renderer (render_reel.py)"]
-    
-    K["SFX Suite and Ambient Bed (motion_library/sfx/)"] --> L["Audio Mastering (-11.5 LUFS)"]
-    
-    J & L --> M["Final Production Reel (1080x1920 MP4)"]
-    
-    style A fill:#F1F5F9,stroke:#64748B,stroke-width:2px
-    style M fill:#E2DDD1,stroke:#00704A,stroke-width:3px
-    style I fill:#FEF3C7,stroke:#D97706,stroke-width:2px
-    style L fill:#DCFCE7,stroke:#16A34A,stroke-width:2px
-```
+The end-to-end autonomous pipeline continuously executes through six discrete stages visualized in the looping workflow flowchart at the top:
+
+| Stage | Module | Key Transformation |
+|:---:|:---|:---|
+| **01** | `detect_cuts.py` | Ingests raw video footage (.mp4/.mov) and companion script (.docx/.txt) |
+| **02** | `transcribe_align.py` | Extracts Whisper millisecond word timestamps and applies acoustic silence/stumble trimming |
+| **03** | `storyboard_planner.py` | Synthesizes an 8-scene beat map alternating between Studio, Cutout, and Infographic |
+| **04** | `paper_objects.py` | Isolates speaker with MediaPipe and composites hanging tags, odometers, and notebook citations |
+| **05** | `FFmpeg Vocal Chain` | Applies adaptive spectral denoising, 85Hz highpass gate, -11.5 LUFS loudness, and motion SFX |
+| **06** | `render_reel.py` | Exports the production-ready 1080x1920 9:16 vertical reel autonomously |
+
+<p align="center">
+  <img src="assets/architecture.svg" alt="edit-reel 3-State Architectural Overview" width="100%" />
+</p>
 
 ---
 
