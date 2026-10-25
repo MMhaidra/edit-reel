@@ -101,47 +101,58 @@ sudo apt-get install -y ffmpeg
 
 ## 🤖 Agentic IDE Integrations
 
-`edit-reel` is designed from the ground up to be orchestrated by modern autonomous agentic coding environments:
+`edit-reel` is designed from the ground up to be orchestrated effortlessly across modern autonomous agentic coding environments:
 
-````carousel
-```markdown
-<!-- slide: Google Antigravity -->
-### 🪐 Google Antigravity
-The skill is located at:
-`~/.gemini/config/skills/edit-reel/SKILL.md`
+<details open>
+<summary><b>🪐 Google Antigravity (Native Skill)</b></summary>
+<br>
 
-Simply trigger in your chat:
-> `/edit-reel english`
-> `/edit-reel darija`
+The skill is registered at `~/.gemini/config/skills/edit-reel/SKILL.md`.
 
-Antigravity will autonomously inspect your raw footage folder (`~/Desktop/projects/reels_IG/`),
-match companion scripts, excise false starts, generate physical graphics, and deliver the finished MP4.
+Simply invoke it in your chat:
+```text
+/edit-reel english
+/edit-reel darija
 ```
-<!-- slide: Claude Code -->
-```markdown
-### 🟠 Claude Code (CLI)
-The repository includes `CLAUDE.md` and links directly to `~/.claude/skills/edit-reel`.
+Antigravity autonomously inspects your raw recordings (`~/Desktop/projects/reels_IG/`), matches companion scripts, excises false starts and stumbles, generates physical paper objects, masters audio to -11.5 LUFS, and renders the finished reel with zero mid-process interruptions.
+
+</details>
+
+<details>
+<summary><b>🟠 Claude Code (CLI)</b></summary>
+<br>
+
+The repository includes [`CLAUDE.md`](CLAUDE.md) and links to `~/.claude/skills/edit-reel`.
 
 In your terminal:
 ```bash
 claude
 > "Run edit-reel pipeline on my raw video in ~/Desktop/projects/reels_IG"
 ```
-Claude Code reads `CLAUDE.md`, tracks pipeline progress, and compiles the reel.
-```
-<!-- slide: Cursor & Windsurf -->
-```markdown
-### ⚡ Cursor & Windsurf
-The repository includes `.cursorrules` and `.windsurfrules`.
+Claude Code reads the workflow rules, tracks progress, and outputs the rendered video.
 
-Open the project in Cursor and prompt Composer / Chat:
-> "Run pipeline.py on C7BAE170.MP4 and generate the full contact sheet preview."
+</details>
+
+<details>
+<summary><b>⚡ Cursor & Windsurf</b></summary>
+<br>
+
+The repository includes [`.cursorrules`](.cursorrules).
+
+Open the project in Cursor and prompt in Composer / Chat:
+```text
+"Run pipeline.py on my raw footage and generate the full 8-scene contact sheet preview."
 ```
-<!-- slide: Standalone Python CLI -->
+
+</details>
+
+<details>
+<summary><b>🐍 Standalone Python CLI (No AI Agent Needed)</b></summary>
+<br>
+
+Run directly from your local terminal:
+
 ```bash
-### 🐍 Standalone Python CLI
-Run directly from your terminal without any AI assistant:
-
 # Process full video with companion script:
 .venv/bin/python3 scripts/pipeline.py \
   -i ~/Desktop/projects/reels_IG/raw_footage.MP4 \
@@ -152,7 +163,8 @@ Run directly from your terminal without any AI assistant:
 # Generate instant scene stills and contact sheet:
 .venv/bin/python3 scripts/preview_reel_stills.py /tmp/reel_previews
 ```
-````
+
+</details>
 
 ---
 
