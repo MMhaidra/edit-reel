@@ -1,8 +1,8 @@
 <div align="center">
 
-# edit-reel
-### Autonomous AI Video Editor for Instagram Reels and TikTok
-**Signature Tactile "Paper and Objects" Editorial Aesthetic for Agentic AI**
+# edit-reel: Open-Source AI Video Editor & Auto Subtitles Generator
+### Autonomous Short-Form Video Editing Agent for Instagram Reels, TikTok, and YouTube Shorts
+**Signature Tactile "Paper and Objects" Motion Graphics Engine for Claude Code, Cursor, Codex, and Google Antigravity**
 
 <p align="center">
   <b>English</b> |
@@ -35,7 +35,8 @@
   <a href="#aesthetic-engine">Aesthetic Engine</a> |
   <a href="#multilingual-support">Multilingual Support</a> |
   <a href="#universal-scene-blueprint">Scene Blueprint</a> |
-  <a href="#audio-mastering-suite">Audio Suite</a>
+  <a href="#audio-mastering-suite">Audio Suite</a> |
+  <a href="#frequently-asked-questions-faq">FAQ</a>
 </p>
 
 ---
@@ -43,22 +44,22 @@
 </div>
 
 <p align="center">
-  <img src="assets/pipeline_flow.gif" alt="edit-reel Autonomous Looping Flowchart" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);" />
+  <img src="assets/pipeline_flow.gif" alt="edit-reel Open-Source AI Video Editor and Auto Subtitles Pipeline Flowchart" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);" />
 </p>
 
 ## Problem and Solution
 
-Vertical short-form video (Instagram Reels, TikTok, YouTube Shorts) commands hundreds of billions of daily impressions worldwide. However, producing compelling educational, technical, scientific, or business talking-head reels by hand requires hours of manual rotoscoping, keyframing, and audio mastering.
+**edit-reel** is a free, local-first, **open-source AI video editor** and **auto subtitles generator** built in Python for automated **short-form video production** (Instagram Reels, TikTok, and YouTube Shorts). It operates both as a standalone CLI tool and as a native **AI video editing agent skill** for **Claude Code**, **Cursor**, **Windsurf**, **OpenAI Codex**, and **Google Antigravity**.
 
-Existing automated tools generate generic videos cluttered with neon subtitle boxes, floating pastel web-cards, or hazard caution tape that look artificial and trigger immediate viewer swipe-away.
+Vertical short-form video commands hundreds of billions of daily views worldwide, yet editing educational, technical, scientific, or business talking-head videos by hand requires hours of manual rotoscoping, silence cutting, keyframing, and audio mastering. Meanwhile, commercial cloud clippers and generic AI video generators produce watermarked videos cluttered with neon subtitle boxes or floating web-cards that look artificial and trigger immediate viewer swipe-away.
 
-**edit-reel** introduces an autonomous, zero-interaction editorial pipeline based on the tactile **"Paper and Objects"** aesthetic:
+Serving as a local-first, no-watermark **open-source alternative to CapCut, Submagic, Descript, OpusClip, and Veed.io**, **edit-reel** introduces an autonomous, zero-interaction editorial pipeline powered by Faster-Whisper, MediaPipe AI Vision, and FFmpeg using the signature tactile **"Paper and Objects"** aesthetic:
 - **Warm Textured Canvas**: Natural cream paper backdrop (`#E2DDD1`) with organic paper grain.
 - **Tangible Physical Primitives**: Hanging cream price tags with brass eyelets, 3D multi-tier coin stacks, and dimensional arrows.
 - **Dynamic Numerical Odometers**: Smooth rolling counters that visually build up to numerical milestones before stamping a conclusion.
 - **Academic Notebook Cutoffs**: Authentic ruled notebook slips with red margin lines, torn bottom edges, and Scotch tape for peer-reviewed citations.
 - **Parallel Coordinate Plots**: Clear side-by-side comparative graphs (such as Linear Myth vs. Logarithmic Reality).
-- **Speech-Protected Trimming**: Millisecond-accurate word-boundary preservation with automatic anti-arm-reach tail cutoff.
+- **Speech-Protected Silence Removal & Auto Subtitles**: Millisecond-accurate Whisper word-boundary preservation, automatic filler-word and retake cutting, kinetic word-by-word animated captions, and anti-arm-reach tail cutoff.
 - **Broadcast Audio Mastering**: -11.5 LUFS mastered dialogue with spectral noise suppression, highpass gating, ambient bed ducking, and motion-locked micro-SFX.
 
 ---
@@ -144,18 +145,19 @@ The repository includes [`.cursorrules`](.cursorrules) configuring code style, s
 
 ## Feature Matrix
 
-| Feature | edit-reel | Generic AI Editors | Manual Video Editing |
+| Feature | edit-reel (Open-Source) | Commercial Cloud AI Editors (Submagic / Veed / OpusClip) | Manual Video Editing (Premiere / CapCut / DaVinci) |
 |:---|:---:|:---:|:---:|
-| **Zero User Interaction During Run** | Yes | No (requires manual prompts) | No (hours of manual labor) |
+| **Zero User Interaction During Run** | Yes (100% Autonomous) | No (requires manual web UI clicks) | No (hours of manual timeline labor) |
 | **Visual Aesthetic** | Tactile Paper and Physical Objects | Neon web-cards / generic templates | Custom (labor-intensive) |
-| **Speaker Isolation** | MediaPipe AI (selfie_segmenter) | Chromakey or None | Manual Rotoscoping / Masking |
+| **AI Background Removal** | Local MediaPipe AI (`selfie_segmenter`) | Paid cloud chromakey or None | Manual Rotoscoping / Masking |
+| **Auto Subtitles & Kinetic Captions** | Word-level Faster-Whisper forced alignment | Cloud ASR (often drifts on technical terms) | Manual caption correction |
 | **Academic Notebook Citations** | Ruled slips with Scotch tape | Plain text boxes | Manual graphic design |
 | **Rolling Numerical Odometers** | Physics-based ease counters | Static text | After Effects expression rigging |
-| **Speech-Protected Trimming** | Whisper word-level boundary locks | Hard silence decibel cuts | Manual waveform slicing |
+| **Speech-Protected Silence Cutting** | Whisper word-level boundary locks | Hard silence decibel cuts | Manual waveform slicing |
 | **Anti-Arm-Reach Cutoff** | Automatic post-speech hold | None (speaker reaches to lens) | Manual clip trimming |
 | **Broadcast Audio Mastering** | -11.5 LUFS vocal chain + ambient bed | Raw microphone audio | Multi-plugin DAW mastering |
-| **Multilingual Support** | 12+ languages (Latin, RTL, CJK) | English only | Dependent on editor |
-| **Local-First Execution** | Yes (runs on your hardware) | Cloud SaaS / Token meters | Yes |
+| **Multilingual Support** | 12+ languages (Latin, RTL, CJK) | Limited or paid tier | Dependent on editor |
+| **Cost & Watermarks** | 100% Free, Local-First, No Watermark | Monthly SaaS subscription / Watermarked | Software license + high time cost |
 
 ---
 
@@ -368,12 +370,12 @@ edit-reel/
 ├── .gitignore                        # Git ignore rules
 ├── credit_ledger.example.json        # Template for API token and cost tracking
 │
-├── assets/                           # Vector architecture and diagram assets
-│   └── architecture.svg
+├── assets/                           # Animated pipeline flowchart assets
+│   └── pipeline_flow.gif
 │
 ├── models/                           # Bundled edge AI vision models
 │   ├── selfie_segmenter.tflite       # Fast 244KB person segmentation model
-│   └── selfie_multiclass.tflite     # High-precision multiclass model
+│   └── selfie_multiclass.tflite      # High-precision multiclass model
 │
 ├── motion_library/                   # Tangible physical objects and styling
 │   ├── paper_objects.py              # Canonical objects (tags, odometers, coins, notebooks)
@@ -396,11 +398,48 @@ edit-reel/
 │   ├── transcribe_align.py           # Whisper forced aligner
 │   ├── storyboard_planner.py         # 3-state scene scheduler
 │   ├── preview_reel_stills.py        # Scene still and contact sheet previewer
+│   ├── generate_animated_flowchart.py# Looping pipeline GIF generator
 │   └── progress_tracker.py           # Real-time terminal progress logger
 │
 └── templates/
     └── config.json                   # Production defaults
 ```
+
+---
+
+## Frequently Asked Questions (FAQ)
+
+<details open>
+<summary><b>What is the best free open-source AI video editor for Instagram Reels, TikTok, and YouTube Shorts?</b></summary>
+<br>
+
+**edit-reel** is a 100% free, MIT-licensed open-source AI video editor written in Python that runs locally on macOS and Linux with zero watermarks. Unlike web-based SaaS clippers, it combines word-accurate Faster-Whisper speech trimming, MediaPipe AI person background segmentation, tactile physical motion graphics, and -11.5 LUFS broadcast audio mastering in a single command.
+
+</details>
+
+<details>
+<summary><b>How do I automatically add animated subtitles and remove silences from talking-head videos in Python?</b></summary>
+<br>
+
+Run `python scripts/pipeline.py -i input.mp4 --lang en`. The pipeline executes `detect_cuts.py` to remove dead air, false starts, and stumbles while protecting spoken syllables, aligns your script to millisecond acoustic timestamps via `transcribe_align.py`, and burns word-by-word kinetic subtitles directly onto the 9:16 vertical canvas.
+
+</details>
+
+<details>
+<summary><b>How does edit-reel work as a Claude Code skill, Cursor rule, or Google Antigravity skill?</b></summary>
+<br>
+
+The repository includes native agent definitions (`SKILL.md`, `CLAUDE.md`, and `.cursorrules`). Running the one-line installer (`curl -fsSL https://raw.githubusercontent.com/MMhaidra/edit-reel/main/install.sh | bash`) registers the `/edit-reel` command globally so your AI coding agent can autonomously edit raw recordings from start to finish.
+
+</details>
+
+<details>
+<summary><b>Does edit-reel require Adobe After Effects, Premiere Pro, or paid cloud APIs?</b></summary>
+<br>
+
+No. All computer vision segmentation (`selfie_segmenter.tflite`), acoustic forced alignment (`faster-whisper`), procedural motion graphics (`Pillow` / `OpenCV`), and multi-track audio mastering (`FFmpeg`) execute locally on your machine at zero cost.
+
+</details>
 
 ---
 

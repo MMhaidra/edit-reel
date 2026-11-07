@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "edit-reel"
 version = "1.0.0"
-description = "Autonomous AI Video Editor for Instagram Reels & TikTok — Signature Tactile 'Paper & Objects' Editorial Aesthetic for Antigravity, Claude Code, Cursor, & Codex"
+description = "Open-Source AI Video Editor & Auto Subtitles Generator for Instagram Reels, TikTok & YouTube Shorts — Autonomous Python Video Editing Agent & Skill for Claude Code, Cursor, Codex & Google Antigravity"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -13,17 +13,28 @@ authors = [
     {name = "Mohammed Mhaidra"}
 ]
 keywords = [
+    "ai-video-editor",
+    "short-form-video",
+    "auto-subtitles",
     "video-editing",
     "instagram-reels",
     "tiktok",
-    "ai-video-editor",
-    "antigravity",
+    "youtube-shorts",
     "claude-code",
+    "claude-skills",
     "cursor",
+    "antigravity",
+    "codex",
     "agentic-ai",
     "mediapipe",
+    "whisper",
     "faster-whisper",
-    "motion-graphics"
+    "ffmpeg",
+    "motion-graphics",
+    "video-automation",
+    "caption-generator",
+    "silence-removal",
+    "talking-head"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
