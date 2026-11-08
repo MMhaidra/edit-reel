@@ -66,3 +66,12 @@ Issues = "https://github.com/MMhaidra/edit-reel/issues"
 
 [project.scripts]
 edit-reel = "scripts.pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scripts*", "motion_library*"]
+exclude = ["assets*", "models*", "templates*", "references*", "docs*", ".claude*"]
+
+[tool.setuptools.package-data]
+motion_library = ["**/*"]
+
