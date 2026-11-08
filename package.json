@@ -1,0 +1,26 @@
+{
+  "name": "edit-reel",
+  "version": "1.0.0",
+  "description": "Open-Source AI Video Editor & Auto Subtitles Generator for Instagram Reels, TikTok & YouTube Shorts",
+  "author": "Mohammed Mhaidra",
+  "license": "MIT",
+  "homepage": "https://github.com/MMhaidra/edit-reel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MMhaidra/edit-reel.git"
+  },
+  "keywords": [
+    "ai-video-editor",
+    "skills",
+    "claude-skills",
+    "agentic-ai",
+    "video-editing",
+    "auto-subtitles",
+    "instagram-reels",
+    "tiktok",
+    "youtube-shorts"
+  ],
+  "skills": {
+    "edit-reel": "./SKILL.md"
+  }
+}

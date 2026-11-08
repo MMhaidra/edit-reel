@@ -1,0 +1,38 @@
+name: Bug Report
+description: Create a report to help us improve edit-reel
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill in the details below.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS version, Python version, FFmpeg version
+      placeholder: "e.g. macOS 15.0 / Ubuntu 24.04, Python 3.10, FFmpeg 7.0"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: What command or script did you execute?
+      placeholder: "1. Run python scripts/pipeline.py -i input.mp4 --lang en\n2. See error..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal Logs / Traceback
+      description: Paste relevant terminal output or traceback here
+      render: shell

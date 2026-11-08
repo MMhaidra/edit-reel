@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or production workflows, please cite it as below."
+authors:
+  - family-names: "Mhaidra"
+    given-names: "Mohammed"
+title: "edit-reel: Autonomous Open-Source AI Video Editor & Auto Subtitles Generator"
+version: 1.0.0
+date-released: 2026-10-25
+url: "https://github.com/MMhaidra/edit-reel"
+repository-code: "https://github.com/MMhaidra/edit-reel"
+keywords:
+  - "ai-video-editor"
+  - "video-editing"
+  - "auto-subtitles"
+  - "short-form-video"
+  - "faster-whisper"
+  - "mediapipe"
+  - "ffmpeg"
+  - "claude-code"
+  - "cursor"
+  - "agentic-ai"
+license: "MIT"
+abstract: "edit-reel is an autonomous, zero-interaction open-source AI video editor and auto subtitles generator for 9:16 vertical short-form video (Instagram Reels, TikTok, and YouTube Shorts). It integrates acoustic word-boundary silence removal via Faster-Whisper, MediaPipe AI vision person segmentation, tactile physical motion graphics on warm paper canvas, and -11.5 LUFS broadcast audio mastering."

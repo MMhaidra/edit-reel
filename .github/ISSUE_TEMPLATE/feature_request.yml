@@ -1,0 +1,28 @@
+name: Feature Request
+description: Propose a new physical motion primitive, visual object, or workflow feature
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest an enhancement or new tactile motion primitive for edit-reel.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear description of the problem or limitation.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the Solution You Would Like
+      description: Detailed explanation of the proposed motion primitive, visual state, or audio behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Approaches Considered
+      description: Any other tools, scripts, or workflows you considered.

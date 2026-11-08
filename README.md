@@ -16,7 +16,11 @@
 </p>
 
 [![GitHub Release](https://img.shields.io/github/v/release/MMhaidra/edit-reel?style=flat-square&color=2563EB&label=Release)](https://github.com/MMhaidra/edit-reel/releases/latest)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MMhaidra/edit-reel/blob/main/demo.ipynb)
+[![CI](https://github.com/MMhaidra/edit-reel/actions/workflows/ci.yml/badge.svg)](https://github.com/MMhaidra/edit-reel/actions)
 [![Package](https://img.shields.io/badge/Package-pip%20install-10B981.svg?style=flat-square)](https://github.com/MMhaidra/edit-reel#packages)
+[![GitHub Stars](https://img.shields.io/github/stars/MMhaidra/edit-reel?style=flat-square&color=blue)](https://github.com/MMhaidra/edit-reel/stargazers)
+[![Discussions](https://img.shields.io/badge/Discussions-Join-blueviolet?style=flat-square)](https://github.com/MMhaidra/edit-reel/discussions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-3B82F6.svg?style=flat-square)](https://www.python.org/downloads/)
 [![MediaPipe](https://img.shields.io/badge/Vision-MediaPipe-EA580C.svg?style=flat-square)](https://developers.google.com/mediapipe)
@@ -24,8 +28,10 @@
 [![Google Antigravity](https://img.shields.io/badge/Skill-Google%20Antigravity-4285F4.svg?style=flat-square)](https://github.com/MMhaidra/edit-reel)
 [![Claude Code](https://img.shields.io/badge/Agent-Claude%20Code-D97706.svg?style=flat-square)](https://claude.ai)
 [![Cursor Ready](https://img.shields.io/badge/IDE-Cursor%20Ready-000000.svg?style=flat-square)](https://cursor.com)
+[![Share on X](https://img.shields.io/badge/Share_on_X-000000?style=flat-square&logo=x&logoColor=white)](https://twitter.com/intent/tweet?text=edit-reel%3A%20Autonomous%20Open-Source%20AI%20Video%20Editor%20for%20Reels%2C%20TikTok%20%26%20Shorts!%20Check%20it%20out%3A%20https%3A%2F%2Fgithub.com%2FMMhaidra%2Fedit-reel)
 
 <p align="center">
+  <a href="#try-without-installation-google-colab">Try in Colab</a> |
   <a href="#problem-and-solution">Problem and Solution</a> |
   <a href="#quickstart-30-seconds">Quickstart</a> |
   <a href="#agentic-install">Agentic Install</a> |
@@ -36,7 +42,8 @@
   <a href="#multilingual-support">Multilingual Support</a> |
   <a href="#universal-scene-blueprint">Scene Blueprint</a> |
   <a href="#audio-mastering-suite">Audio Suite</a> |
-  <a href="#frequently-asked-questions-faq">FAQ</a>
+  <a href="#frequently-asked-questions-faq">FAQ</a> |
+  <a href="#star-history">Star History</a>
 </p>
 
 ---
@@ -106,6 +113,20 @@ python scripts/pipeline.py \
 ```bash
 python scripts/preview_reel_stills.py /tmp/reel_previews
 ```
+
+---
+
+## Try Without Installation (Google Colab)
+
+You can run and test edit-reel entirely in the cloud without installing Python or FFmpeg on your machine:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MMhaidra/edit-reel/blob/main/demo.ipynb)
+
+The interactive notebook walks through:
+- Automated Faster-Whisper acoustic extraction
+- MediaPipe person segmentation on warm paper canvas
+- Physical objects rendering (hanging tags, 3D coins, and notebook citations)
+- Broadcast audio mastering preview
 
 ---
 
@@ -440,6 +461,41 @@ The repository includes native agent definitions (`SKILL.md`, `CLAUDE.md`, and `
 No. All computer vision segmentation (`selfie_segmenter.tflite`), acoustic forced alignment (`faster-whisper`), procedural motion graphics (`Pillow` / `OpenCV`), and multi-track audio mastering (`FFmpeg`) execute locally on your machine at zero cost.
 
 </details>
+
+---
+
+## Star History
+
+If you find edit-reel useful for your content creation or agent workflows, please consider starring the repository to help other developers and creators discover it:
+
+<p align="center">
+  <a href="https://star-history.com/#MMhaidra/edit-reel&Date">
+    <img src="https://api.star-history.com/svg?repos=MMhaidra/edit-reel&type=Date" alt="edit-reel Star History Chart" width="100%" />
+  </a>
+</p>
+
+---
+
+## Citation
+
+If you use edit-reel in your research, academic publications, or production frameworks, please cite it as follows:
+
+```bibtex
+@software{mhaidra2026editreel,
+  author = {Mhaidra, Mohammed},
+  title = {edit-reel: Autonomous Open-Source AI Video Editor & Auto Subtitles Generator},
+  year = {2026},
+  url = {https://github.com/MMhaidra/edit-reel},
+  version = {1.0.0}
+}
+```
+
+---
+
+## Community and Launch Playbook
+
+Looking to share edit-reel with your community, submit to Awesome lists, or post a launch thread? Check out our complete guide:
+- [`docs/VIRAL_LAUNCH_PLAYBOOK.md`](docs/VIRAL_LAUNCH_PLAYBOOK.md): Ready-to-copy launch templates for Hacker News (Show HN), Reddit (`r/Python`, `r/LocalLLaMA`, `r/ClaudeAI`), Twitter/X launch threads, and curated directory PR submissions.
 
 ---
 
