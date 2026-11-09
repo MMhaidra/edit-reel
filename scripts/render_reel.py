@@ -227,7 +227,7 @@ def build_sprite_bank(lang="en"):
     bank["chip_26wks"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "2026: 26.4 WEEKS", F(34), w=440, h=110), rot=1.5)
     bank["chip_half_year"] = bake_sprite(V.label_chip(None, "OVER 6 MONTHS TO GET HIRED", F(36), w=560, h=120), rot=-1.0)
 
-    hyst_txt = "HYSTERESIS: تآكل المهارات" if is_ar else "HYSTERESIS: SKILL EROSION"
+    hyst_txt = "HYSTERESIS: SKILL EROSION"
     bank["slip_hysteresis"] = bake_sprite(V.paper_slip(hyst_txt, F(46)), rot=-1.0)
     bank["chip_skill_erosion"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "SKILL EROSION", F(38), w=480, h=130), rot=-1.5)
     bank["chip_pricing_power"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "LOST PRICING POWER", F(36), w=500, h=130), rot=1.5)
@@ -236,10 +236,10 @@ def build_sprite_bank(lang="en"):
     bank["chip_auto"] = bake_sprite(V.label_chip(None, "AUTOMOBILE", F(36), w=360, h=100), rot=-2.0)
     bank["chip_tech"] = bake_sprite(V.label_chip(None, "SOUND SYSTEM", F(34), w=380, h=100), rot=1.5)
     bank["chip_home"] = bake_sprite(V.label_chip(None, "SPLIT-LEVEL HOME", F(32), w=420, h=100), rot=-1.0)
-    needs_txt = "FALSE NEEDS: الاحتياجات المزيفة" if is_ar else "FALSE NEEDS & MANUFACTURED DESIRES"
+    needs_txt = "FALSE NEEDS: MANUFACTURED DESIRES"
     bank["slip_false_needs"] = bake_sprite(V.paper_slip(needs_txt, F(44)), rot=1.0)
 
-    hedonic_txt = "HEDONIC TREADMILL: دولاب التعود" if is_ar else "HEDONIC TREADMILL (BRICKMAN 1978)"
+    hedonic_txt = "HEDONIC TREADMILL (BRICKMAN 1978)"
     bank["slip_hedonic_brickman"] = bake_sprite(V.paper_slip(hedonic_txt, F(46)), rot=-1.5)
     bank["chip_spike"] = bake_sprite(V.label_chip(V.draw_arrow(90, True, V.GREEN), "DOPAMINE SPIKE", F(38), w=460, h=120), rot=-2.0)
     bank["chip_baseline"] = bake_sprite(V.label_chip(None, "ADAPTATION RESET", F(36), w=440, h=110), rot=1.5)
@@ -554,17 +554,9 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         paste_sprite(canvas, bank["chip_baseline"], 780, 495, offset_y=(1.0 - p_base) * 30, opacity=min(1.0, p_base))
 
     elif btype == "kasser_ryan_dark_side":
-        # Beat 3 (Marcuse): Notebook cutoff with yellow highlighter wipe + Anxiety chip
+        # Beat 3 (Marcuse): Clean notebook cutoff + Anxiety & Status chips
         p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
         paste_sprite(canvas, bank["note_kasser"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
-
-        # Animated yellow highlighter stroke across notebook cutoff title
-        p_high = ease_out_cubic(min(1.0, max(0.0, (el - 0.35) / 0.90)))
-        if p_high > 0.05:
-            d = ImageDraw.Draw(canvas, "RGBA")
-            hx0, hx1 = 230, 230 + int(580 * p_high)
-            hy = NOTE_Y_SPEAKER - 35
-            d.rectangle([hx0, hy - 14, hx1, hy + 14], fill=(254, 240, 138, 140))
 
         p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.30) / 0.45))) * fade_out
         p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out

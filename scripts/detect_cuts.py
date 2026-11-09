@@ -257,6 +257,28 @@ def analyze_raw_words_and_stumbles(video_path, silence_ranges, lang="en"):
                     stumble_cuts.append((max(0.0, s_st - 0.55), s_en))
                     break
 
+        # 5. Darija self-corrected multi-word rectification (e.g. "والمقارب السلبي" -> "المقارنة السلبي")
+        if lang in ["ary", "darija", "moroccan"]:
+            for i in range(len(all_words) - 3):
+                w1, w2, w3, w4 = all_words[i], all_words[i + 1], all_words[i + 2], all_words[i + 3]
+                if any(k in w1["tok"] for k in ["مقارب", "مقاربة"]) and "مقارنة" in w3["tok"]:
+                    st = max(0.0, w1["start"] - 0.04)
+                    en = max(w2["end"] + 0.05, w3["start"] - 0.04)
+                    print(f"[detect_cuts] ✂️ Cutting self-corrected Darija stumble '{w1['word']} {w2['word']}' at {st:.2f}s–{en:.2f}s")
+                    stumble_cuts.append((st, en))
+
+        # 6. English stumble rectification (e.g. "This is faction and competitive knit" -> pause -> "Dissatisfaction and competitiveness")
+        for i in range(len(all_words) - 4):
+            w = all_words[i]
+            if "competitive" in w["tok"] and "competitiveness" not in w["tok"]:
+                for j in range(i + 1, min(len(all_words), i + 8)):
+                    if "competitiveness" in all_words[j]["tok"]:
+                        st_idx = max(0, i - 4)
+                        st = max(0.0, all_words[st_idx]["start"] - 0.04)
+                        en = max(all_words[i + 1]["end"] + 0.05, all_words[j - 3]["start"] - 0.04)
+                        print(f"[detect_cuts] ✂️ Cutting English stumble and pause at {st:.2f}s–{en:.2f}s")
+                        stumble_cuts.append((st, en))
+
     except Exception as e:
         print(f"[detect_cuts] Whisper raw analysis note: {e}", file=sys.stderr)
 
@@ -510,7 +532,10 @@ def main():
         sys.exit(1)
 
     output_path = Path(args.output) if args.output else input_path.parent / f"{input_path.stem}_cleaned.mp4"
-    workdir = Path(args.workdir)
+    if args.workdir == "./.reel_cache":
+        workdir = output_path.parent / f".reel_cache_{input_path.stem}" / "cuts"
+    else:
+        workdir = Path(args.workdir)
     workdir.mkdir(parents=True, exist_ok=True)
 
     duration = get_video_duration(input_path)
