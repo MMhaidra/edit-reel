@@ -289,8 +289,23 @@ def paper_slip(text, font, pad=(34, 18), rot=0.0, color=INK):
 
 
 def label_chip(icon_img, text, font, w=470, h=150, icon_h=84):
+    font_s = font.font_variant(size=font.size * S)
+    d_dummy = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
+    bb = d_dummy.textbbox((0, 0), text, font=font_s)
+    tw = bb[2] - bb[0]
+    th = bb[3] - bb[1]
+
+    icon_space = 0
+    if icon_img is not None:
+        ic_scaled_h = icon_h * S
+        ic_scaled_w = int(icon_img.width * (ic_scaled_h / icon_img.height))
+        icon_space = ic_scaled_w + 22 * S
+
+    # Auto-expand w to guarantee no text is ever clipped, with generous safe padding
+    min_needed_w = int((24 * S + icon_space + tw + 32 * S) / S)
+    w = max(w, min_needed_w)
+
     sw, sh = w * S, h * S
-    font = font.font_variant(size=font.size * S)
     im = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     d.rounded_rectangle([0, 0, sw - 1, sh - 1], radius=18 * S, fill=(252, 251, 248, 255))
@@ -302,8 +317,7 @@ def label_chip(icon_img, text, font, w=470, h=150, icon_h=84):
         tx0 = 24 * S + ic.width + 22 * S
     else:
         tx0 = 24 * S
-    bb = d.textbbox((0, 0), text, font=font)
-    d.text((tx0 - bb[0], (sh - (bb[3] - bb[1])) / 2 - bb[1]), text, font=font, fill=INK)
+    d.text((tx0 - bb[0], (sh - th) // 2 - bb[1]), text, font=font_s, fill=INK)
     return im
 
 
@@ -312,6 +326,22 @@ def notebook_cutoff(title, subtitle=None, note=None, w=480, h=140, rot=0.0):
     Renders an authentic torn notebook / paper cutoff with faint ruled lines,
     red margin line, torn bottom edge, and optional top Scotch tape.
     """
+    f_title = tw_font(21, bold=True).font_variant(size=21 * S)
+    f_sub = tw_font(17, bold=False).font_variant(size=17 * S)
+    f_note = tw_font(15, bold=False).font_variant(size=15 * S)
+
+    d_dummy = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
+    margin_x = 36 * S
+    tx_start = margin_x + 16 * S
+
+    w_title = (d_dummy.textbbox((0, 0), title, font=f_title)[2] - d_dummy.textbbox((0, 0), title, font=f_title)[0]) if title else 0
+    w_sub = (d_dummy.textbbox((0, 0), subtitle, font=f_sub)[2] - d_dummy.textbbox((0, 0), subtitle, font=f_sub)[0]) if subtitle else 0
+    w_note = (d_dummy.textbbox((0, 0), note, font=f_note)[2] - d_dummy.textbbox((0, 0), note, font=f_note)[0]) if note else 0
+
+    max_text_w = max(w_title, w_sub, w_note)
+    min_needed_w = int((tx_start + max_text_w + 32 * S) / S)
+    w = max(w, min_needed_w)
+
     sw, sh = w * S, h * S
     im = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -334,7 +364,6 @@ def notebook_cutoff(title, subtitle=None, note=None, w=480, h=140, rot=0.0):
         d.line([(8 * S, ly), (sw - 8 * S, ly)], fill=(218, 224, 233, 200), width=2)
 
     # Faint red left margin line
-    margin_x = 36 * S
     d.line([(margin_x, 4 * S), (margin_x, sh - 16 * S)], fill=(248, 113, 113, 140), width=3)
 
     # Semi-transparent Scotch tape at the top
@@ -342,13 +371,7 @@ def notebook_cutoff(title, subtitle=None, note=None, w=480, h=140, rot=0.0):
     tx0 = (sw - tape_w) // 2
     d.rectangle([tx0, 0, tx0 + tape_w, tape_h], fill=(245, 240, 220, 160), outline=(220, 215, 195, 200), width=2)
 
-    # Text content (typewriter font)
-    f_title = tw_font(21, bold=True).font_variant(size=21 * S)
-    f_sub = tw_font(17, bold=False).font_variant(size=17 * S)
-    f_note = tw_font(15, bold=False).font_variant(size=15 * S)
-
     cur_ty = 22 * S
-    tx_start = margin_x + 16 * S
     if title:
         d.text((tx_start, cur_ty), title, font=f_title, fill=INK)
         cur_ty += int(24 * S)

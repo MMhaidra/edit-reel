@@ -76,8 +76,19 @@ The pipeline employs an authentic, tactile physical-object visual language:
   - Uses `faster-whisper` (`word_timestamps=True`) to protect every valid spoken syllable.
   - Excises stumbles, false starts, and repeated takes.
   - **Anti-Arm-Reach Cutoff**: Identifies the calm frame after the last spoken word and stops cleanly before the speaker reaches out to turn off the camera.
-- **Broadcast Audio Mastering**:
-  - **Vocal Chain**: Adaptive FFT spectral denoiser (`afftdn=nr=24:nf=-48:tn=1`) + highpass filter (`85 Hz`) + downward expander gate (`agate`) + studio compressor + `loudnorm` mastered to **-11.5 LUFS**.
+- **Natural Camera Exposure & Skin Tone Grading**:
+  - Eliminates over-white highlight blowout from 10-bit Apple HLG / BT.2020 camera footage without artificial yellow or chalky white discoloration.
+  - Standard SDR tonemapping and gamma compression filter chain:
+    `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,eq=gamma=0.88:contrast=0.96:brightness=-0.025:saturation=0.99,unsharp=5:5:0.25:5:5:0.10`
+  - Yields rich, healthy, natural skin tones (R ~ 128, G ~ 119, B ~ 111) with zero blown-out pixels.
+- **Safe Layout Geometry & Zero-Overlap Guarantee**:
+  - When the lowered cutout speaker is active at `y >= 650`, all graphic elements (notebook cutoffs, slips, chips, curves, tags) must strictly reside in the safe upper zone `y = 110..530`.
+  - All chip and notebook bounding boxes (`label_chip`, `notebook_cutoff`) auto-expand dynamically with at least 32px safe horizontal padding, mathematically guaranteeing zero text clipping.
+- **Natural Broadcast Audio Mastering (Zero 'Deep Hole' Boxiness)**:
+  - Strict prohibition against heavy FFT spectral noise cancellation (`afftdn=nr=24`) and aggressive downward gates (`agate`), which cause watery phase artifacts, comb filtering, and hollow barrel resonance.
+  - Clean, transparent broadcast vocal chain:
+    `highpass=f=75,equalizer=f=220:t=q:w=1.0:g=-1.0,equalizer=f=3800:t=q:w=1.0:g=1.5,acompressor=threshold=-18dB:ratio=2.2:attack=15:release=100:makeup=2.0dB,loudnorm=I=-11.5:LRA=6.0:TP=-0.5`
+  - Preserves natural acoustic room air, chest warmth, and vocal presence mastered to **-11.5 LUFS**.
   - **Background Music**: Warm ambient music bed (`ambient_bed.wav`) low-passed at `850 Hz` at `volume=0.045`.
   - **Keyframe-Locked SFX**: Micro-accents (`0.036..0.048` volume) synchronized to object reveal milestones (`paper_turn.wav`, `cash_chime.wav`, `tech_tick.wav`, `subtle_whoosh.wav`).
 

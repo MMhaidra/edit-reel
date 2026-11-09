@@ -245,9 +245,8 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     # 1. Base Video Grading + Split Speaker Crop for Bottom Half
     filter_chains = [
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-        "smartblur=lr=1.2:ls=-0.25:lt=-3.0:cr=0.8:cs=-0.15:ct=-2.0,"
-        "eq=contrast=1.01:brightness=0.0:saturation=1.0,"
-        f"unsharp=5:5:0.35:5:5:0.15,format=yuv420p,split=2[v_full][v_crop_src]",
+        "eq=gamma=0.88:contrast=0.96:brightness=-0.025:saturation=0.99,"
+        f"unsharp=5:5:0.25:5:5:0.10,format=yuv420p,split=2[v_full][v_crop_src]",
         f"[v_crop_src]crop=1080:{spk_h}:0:{speaker_crop_y}[v_spk_bot]"
     ]
 
@@ -291,17 +290,14 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     v_final = "v_prod"
     filter_chains.append(f"[{last_v}][{sub_input_idx}:v]overlay=x=0:y=0:format=auto,format=yuv420p[{v_final}]")
 
-    # 4. Clean Broadcast Voice Mastering (-11.5 LUFS, Zero 'tshshhhhh' Hiss) + Background Music + Motion SFX
+    # 4. Clean Broadcast Voice Mastering (-11.5 LUFS) + Background Music + Motion SFX
     a_final = "a_prod"
     voice_chain = (
-        "[0:a]highpass=f=85,"
-        "lowpass=f=12000,"
-        "afftdn=nr=24:nf=-48:tn=1,"
-        "equalizer=f=250:t=q:w=1.2:g=-1.5,"
-        "equalizer=f=3200:t=q:w=1.4:g=3.2,"
-        "agate=threshold=-34dB:ratio=2.5:attack=10:release=120:range=-24dB,"
-        "acompressor=threshold=-22dB:ratio=3.5:attack=10:release=90:makeup=3.5dB,"
-        "loudnorm=I=-11.5:LRA=3.0:TP=-0.2[a_voice]"
+        "[0:a]highpass=f=75,"
+        "equalizer=f=220:t=q:w=1.0:g=-1.0,"
+        "equalizer=f=3800:t=q:w=1.0:g=1.5,"
+        "acompressor=threshold=-18dB:ratio=2.2:attack=15:release=100:makeup=2.0dB,"
+        "loudnorm=I=-11.5:LRA=6.0:TP=-0.5[a_voice]"
     )
     filter_chains.append(voice_chain)
 
