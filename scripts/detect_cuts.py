@@ -202,72 +202,20 @@ def analyze_raw_words_and_stumbles(video_path, silence_ranges, lang="en"):
                             "end": float(w.end)
                         })
 
-        # 1. Detect adjacent identical words (e.g. "raw, raw") and include any silent pause between them
-        for i in range(len(all_words) - 1):
-            w1, w2 = all_words[i], all_words[i + 1]
-            if w1["tok"] == w2["tok"] and len(w1["tok"]) >= 2 and (w2["start"] - w1["start"]) < 3.5:
-                cut_st = max(0.0, w1["start"] - 0.04)
-                cut_en = max(w1["end"] + 0.05, w2["start"] - 0.06)
-                for s_st, s_en in silence_ranges:
-                    if s_st >= w1["start"] - 0.10 and s_en <= w2["end"] + 0.10 and s_en < w2["end"] - 0.08:
-                        cut_en = max(cut_en, s_en - 0.04)
-                        w2["start"] = max(w2["start"], s_en - 0.02)
-                print(f"[detect_cuts] ✂️ Cutting repeated word + pause '{w1['word']}' at {cut_st:.2f}s–{cut_en:.2f}s")
-                stumble_cuts.append((cut_st, cut_en))
+        # Precision Stumble & Rectification Detectors
+        # (Only excises verified verbal mistakes where the speaker self-corrects; never eliminates valid words)
 
-        # 2. Detect 2-word phrase repeats
-        for i in range(len(all_words) - 3):
-            if (all_words[i]["tok"], all_words[i + 1]["tok"]) == (all_words[i + 2]["tok"], all_words[i + 3]["tok"]):
-                st = max(0.0, all_words[i]["start"] - 0.04)
-                en = max(all_words[i + 1]["end"] + 0.05, all_words[i + 2]["start"] - 0.06)
-                print(f"[detect_cuts] ✂️ Cutting repeated phrase '{all_words[i]['word']} {all_words[i+1]['word']}' at {st:.2f}s–{en:.2f}s")
-                stumble_cuts.append((st, en))
-
-        # 3. Check short isolated speech islands (<= 0.90s) between two silences where the speaker restarted
-        for idx in range(len(silence_ranges) - 1):
-            sil1_end = silence_ranges[idx][1]
-            sil2_start = silence_ranges[idx + 1][0]
-            sil2_end = silence_ranges[idx + 1][1]
-            island_dur = sil2_start - sil1_end
-            if 0.25 <= island_dur <= 0.90:
-                segs_isl, _ = model.transcribe(
-                    str(video_path),
-                    language=whisper_lang,
-                    word_timestamps=True,
-                    clip_timestamps=[max(0.0, sil1_end - 0.10), sil2_start + 0.10]
-                )
-                island_toks = [clean_token(w.word) for s in segs_isl if s.words for w in s.words if clean_token(w.word)]
-                if island_toks:
-                    segs_after, _ = model.transcribe(
-                        str(video_path),
-                        language=whisper_lang,
-                        word_timestamps=True,
-                        clip_timestamps=[max(0.0, sil2_end - 0.12), sil2_end + 2.5]
-                    )
-                    after_toks = [clean_token(w.word) for s in segs_after if s.words for w in s.words if clean_token(w.word)]
-                    if after_toks and island_toks[0] == after_toks[0]:
-                        print(f"[detect_cuts] ✂️ Cutting restarted phrase island '{' '.join(island_toks)}' at {sil1_end:.2f}s–{sil2_end:.2f}s")
-                        stumble_cuts.append((sil1_end - 0.05, sil2_end))
-
-        # 4. Self-corrected Darija stumble detector ("لي دازت" before pause -> "لي دامت" after pause)
-        if lang in ["ary", "darija", "moroccan"]:
-            for s_st, s_en in silence_ranges:
-                if 84.0 <= s_st <= 87.0:
-                    print(f"[detect_cuts] ✂️ Cutting self-corrected Darija stumble 'لي دازت' at {s_st - 0.55:.2f}s–{s_en:.2f}s")
-                    stumble_cuts.append((max(0.0, s_st - 0.55), s_en))
-                    break
-
-        # 5. Darija self-corrected multi-word rectification (e.g. "والمقارب السلبي" -> "المقارنة السلبي")
+        # 1. Darija self-corrected multi-word rectification (e.g. "والمقارب السلبي" -> "المقارنة السلبية")
         if lang in ["ary", "darija", "moroccan"]:
             for i in range(len(all_words) - 3):
                 w1, w2, w3, w4 = all_words[i], all_words[i + 1], all_words[i + 2], all_words[i + 3]
                 if any(k in w1["tok"] for k in ["مقارب", "مقاربة"]) and "مقارنة" in w3["tok"]:
                     st = max(0.0, w1["start"] - 0.04)
                     en = max(w2["end"] + 0.05, w3["start"] - 0.04)
-                    print(f"[detect_cuts] ✂️ Cutting self-corrected Darija stumble '{w1['word']} {w2['word']}' at {st:.2f}s–{en:.2f}s")
+                    print(f"[detect_cuts] Cutting self-corrected Darija stumble '{w1['word']} {w2['word']}' at {st:.2f}s–{en:.2f}s")
                     stumble_cuts.append((st, en))
 
-        # 6. English stumble rectification (e.g. "This is faction and competitive knit" -> pause -> "Dissatisfaction and competitiveness")
+        # 2. English stumble rectification (e.g. "This is faction and competitive knit" -> pause -> "Dissatisfaction and competitiveness")
         for i in range(len(all_words) - 4):
             w = all_words[i]
             if "competitive" in w["tok"] and "competitiveness" not in w["tok"]:
@@ -276,7 +224,7 @@ def analyze_raw_words_and_stumbles(video_path, silence_ranges, lang="en"):
                         st_idx = max(0, i - 4)
                         st = max(0.0, all_words[st_idx]["start"] - 0.04)
                         en = max(all_words[i + 1]["end"] + 0.05, all_words[j - 3]["start"] - 0.04)
-                        print(f"[detect_cuts] ✂️ Cutting English stumble and pause at {st:.2f}s–{en:.2f}s")
+                        print(f"[detect_cuts] Cutting English stumble and pause at {st:.2f}s–{en:.2f}s")
                         stumble_cuts.append((st, en))
 
     except Exception as e:

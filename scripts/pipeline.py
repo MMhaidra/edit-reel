@@ -509,12 +509,21 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
     if credit_summary:
         print_credit_dashboard(credit_summary)
 
-    if not use_cache:
-        print(f"[pipeline] Cleaning up intermediate work assets for zero-clutter delivery...")
+    # Export clean, descriptive filename for production delivery
+    REEL_FRIENDLY_NAMES = {
+        "E8AE11A3-4062-4691-AF49-DD69AC94FBF9": "Reel_1_The_Hidden_Unemployment_Crisis_EN.mp4",
+        "8D33DF6D-7C1A-4784-B8E4-3B7D0A5CFAC4": "Reel_2_The_Hidden_Unemployment_Crisis_Darija.mp4",
+        "DAA97F19-F02A-40FB-B7D2-8BF87A59FDD9": "Reel_3_Herbert_Marcuse_False_Needs_EN.mp4",
+        "F189A3EA-73AF-4BED-A71F-C14272E9D58E": "Reel_4_Herbert_Marcuse_False_Needs_Darija.mp4"
+    }
+    friendly_name = REEL_FRIENDLY_NAMES.get(video_path.stem)
+    if friendly_name:
+        friendly_output = output_dir / friendly_name
         try:
-            shutil.rmtree(workdir)
+            shutil.copy2(str(final_output), str(friendly_output))
+            print(f"[pipeline] Exported descriptive master reel to: {friendly_output}")
         except Exception as e:
-            print(f"[pipeline] Cleanup note: {e}")
+            print(f"[pipeline] Friendly export note: {e}")
 
     for stray in output_dir.glob(f"{video_path.stem}_PROD_REEL.*"):
         if stray.suffix.lower() != ".mp4":

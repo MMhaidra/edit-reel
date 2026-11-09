@@ -310,170 +310,104 @@ def run_faster_whisper_words(audio_path, language="en"):
 
 def force_align_script_to_acoustic_words(script_text, acoustic_words, language="en", duration=60.0):
     """
-    Locks the exact words of `script_text` onto the millisecond acoustic word timestamps
-    from `faster-whisper` using Time-Constrained Content-Word Anchor Matching.
-    Guarantees zero shift/delay on both Moroccan Darija and English scripts.
+    Locks script words onto millisecond acoustic word timestamps from `faster-whisper`.
+    Guarantees that EVERY word preserves its real acoustic [start, end] timestamps
+    so subtitles NEVER drift or lag behind the speaker's voice.
     """
-    clean_script = script_text.replace("—", " - ").replace("–", " - ")
-    script_tokens = [t for t in clean_script.split() if t.strip() and t.strip() != "-"]
-    if not script_tokens or not acoustic_words:
+    if not acoustic_words:
         return None
 
-    norm_script = [normalize_token(t, language) for t in script_tokens]
-    norm_acoustic = [normalize_token(w["word"], language) for w in acoustic_words]
+    clean_script = script_text.replace("—", " - ").replace("–", " - ")
+    script_tokens = [t for t in clean_script.split() if t.strip() and t.strip() != "-"]
+    if not script_tokens:
+        aligned_words = list(acoustic_words)
+    else:
+        norm_a = [normalize_token(w["word"], language) for w in acoustic_words]
+        norm_s = [normalize_token(t, language) for t in script_tokens]
+        n_a, n_s = len(norm_a), len(norm_s)
 
-    n_s = len(script_tokens)
-    n_a = len(acoustic_words)
+        # Dynamic programming global alignment between acoustic tokens and script tokens
+        dp = [[0.0] * (n_s + 1) for _ in range(n_a + 1)]
+        trace = [[0] * (n_s + 1) for _ in range(n_a + 1)]
 
-    speech_start_t = float(acoustic_words[0]["start"])
-    speech_end_t = float(acoustic_words[-1]["end"])
-    speech_span = max(1.0, speech_end_t - speech_start_t)
+        for i in range(1, n_a + 1):
+            dp[i][0] = i * -0.25
+            trace[i][0] = 2
+        for j in range(1, n_s + 1):
+            dp[0][j] = j * -0.25
+            trace[0][j] = 3
 
-    # Build cumulative character progress for script tokens to estimate expected timestamp
-    char_lens = [max(2, len(t)) for t in norm_script]
-    tot_script_chars = float(sum(char_lens))
-    cum_chars = []
-    acc = 0.0
-    for cl in char_lens:
-        cum_chars.append(acc / tot_script_chars)
-        acc += cl
-
-    def expected_time_for_script_idx(si):
-        return speech_start_t + cum_chars[si] * speech_span
-
-    # Time-Constrained Monotonic Anchor Search:
-    # We march through script words `si` and search for strong content-word matches in `acoustic_words`
-    # within a local time window around `expected_time_for_script_idx(si)`.
-    anchors = [(0, 0)]
-    last_si = 0
-    last_aj = 0
-
-    for si in range(1, n_s - 1):
-        s_tok = norm_script[si]
-        if not is_anchor_worthy(s_tok, language):
-            continue
-
-        exp_t = expected_time_for_script_idx(si)
-        # Estimate expected acoustic index from last anchor + proportional progress
-        rem_s = max(1, (n_s - 1) - last_si)
-        rem_a = max(1, (n_a - 1) - last_aj)
-        center_aj = last_aj + int(((si - last_si) / float(rem_s)) * rem_a)
-
-        win_start = max(last_aj + 1, center_aj - 10)
-        win_end = min(n_a - 1, center_aj + 12)
-
-        best_aj = None
-        best_score = 0.0
-
-        for aj in range(win_start, win_end):
-            a_tok = norm_acoustic[aj]
-            if not a_tok:
-                continue
-            ac_t = float(acoustic_words[aj]["start"])
-            time_diff = abs(ac_t - exp_t)
-            # Never allow an anchor to jump more than 4.2s away from expected speech progress
-            if time_diff > 4.2:
-                continue
-
-            if s_tok == a_tok:
-                sim = 1.0
-            else:
-                if len(s_tok) < 3 or len(a_tok) < 3:
-                    continue
-                sim = difflib.SequenceMatcher(None, s_tok, a_tok).ratio()
-
-            if sim < 0.72:
-                continue
-
-            # Combine phonetic similarity with temporal proximity bonus
-            prox_bonus = max(0.0, 1.0 - (time_diff / 4.5)) * 0.15
-            idx_bonus = max(0.0, 1.0 - (abs(aj - center_aj) / 12.0)) * 0.10
-            score = sim + prox_bonus + idx_bonus
-            if score > best_score:
-                best_score = score
-                best_aj = aj
-
-        if best_aj is not None:
-            anchors.append((si, best_aj))
-            last_si = si
-            last_aj = best_aj
-
-    if anchors[-1][0] < n_s - 1:
-        anchors.append((n_s - 1, n_a - 1))
-
-    # Deduplicate and enforce strict monotonicity
-    clean_anchors = [anchors[0]]
-    for si, aj in anchors[1:]:
-        prev_si, prev_aj = clean_anchors[-1]
-        if si > prev_si and aj >= prev_aj:
-            clean_anchors.append((si, aj))
-
-    print(f"[transcribe_align] ✓ Locked {len(clean_anchors)} time-constrained acoustic anchors across {n_s} script words!")
-
-    # Step 2: Assign exact timestamps to every script word by mapping across the acoustic words in each span
-    aligned_words = [None] * n_s
-
-    for idx in range(len(clean_anchors)):
-        s_idx, a_idx = clean_anchors[idx]
-        w_ac = acoustic_words[min(a_idx, n_a - 1)]
-        aligned_words[s_idx] = {
-            "word": script_tokens[s_idx],
-            "start": w_ac["start"],
-            "end": w_ac["end"]
-        }
-
-        if idx + 1 < len(clean_anchors):
-            next_s, next_a = clean_anchors[idx + 1]
-            span_s = next_s - s_idx - 1
-            if span_s > 0:
-                inner_ac = acoustic_words[a_idx + 1:next_a]
-                if len(inner_ac) >= span_s and len(inner_ac) > 0:
-                    for k in range(span_s):
-                        ac_k = inner_ac[int(k * len(inner_ac) / float(span_s))]
-                        aligned_words[s_idx + 1 + k] = {
-                            "word": script_tokens[s_idx + 1 + k],
-                            "start": ac_k["start"],
-                            "end": ac_k["end"]
-                        }
+        for i in range(1, n_a + 1):
+            tok_a = norm_a[i - 1]
+            for j in range(1, n_s + 1):
+                tok_s = norm_s[j - 1]
+                if tok_a == tok_s and tok_a:
+                    match_score = 1.0
+                elif tok_a and tok_s:
+                    sim = difflib.SequenceMatcher(None, tok_a, tok_s).ratio()
+                    match_score = 1.0 if sim >= 0.68 else (sim * 1.4 - 0.4)
                 else:
-                    span_start_t = acoustic_words[min(a_idx, n_a - 1)]["end"]
-                    span_end_t = acoustic_words[min(next_a, n_a - 1)]["start"]
-                    if span_end_t <= span_start_t:
-                        span_start_t = acoustic_words[min(a_idx, n_a - 1)]["start"]
-                        span_end_t = acoustic_words[min(next_a, n_a - 1)]["end"]
+                    match_score = -0.2
 
-                    sub_tokens = script_tokens[s_idx + 1:next_s]
-                    tot_chars = max(1, sum(len(t) for t in sub_tokens))
-                    cur_t = span_start_t
-                    avail_dur = max(0.08 * span_s, span_end_t - span_start_t)
-                    for k, tok_str in enumerate(sub_tokens):
-                        w_dur = avail_dur * (len(tok_str) / float(tot_chars))
-                        st = round(cur_t, 3)
-                        en = round(cur_t + max(0.06, w_dur * 0.94), 3)
-                        aligned_words[s_idx + 1 + k] = {
-                            "word": tok_str,
-                            "start": st,
-                            "end": en
-                        }
-                        cur_t += w_dur
+                score_diag = dp[i - 1][j - 1] + match_score
+                score_up = dp[i - 1][j] - 0.25
+                score_left = dp[i][j - 1] - 0.25
 
-    # Enforce strict monotonic non-decreasing timestamps across all aligned words
-    for i in range(1, len(aligned_words)):
-        if aligned_words[i] and aligned_words[i - 1]:
-            prev_st = float(aligned_words[i - 1]["start"])
-            if float(aligned_words[i]["start"]) < prev_st:
-                aligned_words[i]["start"] = round(prev_st + 0.02, 3)
-                aligned_words[i]["end"] = round(max(float(aligned_words[i]["end"]), float(aligned_words[i]["start"]) + 0.06), 3)
+                if score_diag >= score_up and score_diag >= score_left:
+                    dp[i][j] = score_diag
+                    trace[i][j] = 1
+                elif score_up >= score_left:
+                    dp[i][j] = score_up
+                    trace[i][j] = 2
+                else:
+                    dp[i][j] = score_left
+                    trace[i][j] = 3
 
-    # Step 3: Group aligned words into natural sentence segments
+        # Backtrack optimal alignment
+        i, j = n_a, n_s
+        aligned_pairs = []
+        while i > 0 or j > 0:
+            tr = trace[i][j]
+            if tr == 1:
+                aligned_pairs.append((i - 1, j - 1))
+                i -= 1
+                j -= 1
+            elif tr == 2:
+                aligned_pairs.append((i - 1, None))
+                i -= 1
+            elif tr == 3:
+                aligned_pairs.append((None, j - 1))
+                j -= 1
+            else:
+                break
+        aligned_pairs.reverse()
+
+        aligned_words = []
+        for a_idx, s_idx in aligned_pairs:
+            if a_idx is not None:
+                ac_w = acoustic_words[a_idx]
+                chosen_word = script_tokens[s_idx] if (s_idx is not None) else ac_w["word"]
+                aligned_words.append({
+                    "word": chosen_word,
+                    "start": ac_w["start"],
+                    "end": ac_w["end"]
+                })
+
+    # Group into natural segments by sentence boundaries or audio pauses > 0.45s
     segments = []
     cur_seg_words = []
     seg_id = 0
-    for w_obj in aligned_words:
-        if not w_obj:
-            continue
+    for idx, w_obj in enumerate(aligned_words):
         cur_seg_words.append(w_obj)
-        if w_obj["word"].endswith((".", "!", "?", "؟", "،", ",")) and len(cur_seg_words) >= 6:
+        is_punc = w_obj["word"].endswith((".", "!", "?", "؟", "،", ","))
+        is_long = len(cur_seg_words) >= 7
+        is_pause = False
+        if idx + 1 < len(aligned_words):
+            gap = aligned_words[idx + 1]["start"] - w_obj["end"]
+            if gap >= 0.45:
+                is_pause = True
+
+        if (is_punc and len(cur_seg_words) >= 4) or (is_pause and len(cur_seg_words) >= 4) or is_long:
             segments.append({
                 "id": seg_id,
                 "start": cur_seg_words[0]["start"],
@@ -493,6 +427,7 @@ def force_align_script_to_acoustic_words(script_text, acoustic_words, language="
             "words": cur_seg_words
         })
 
+    speech_end_t = float(acoustic_words[-1]["end"]) if acoustic_words else duration
     return {
         "language": language,
         "duration": duration,
