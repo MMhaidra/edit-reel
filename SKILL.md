@@ -77,18 +77,21 @@ The pipeline employs an authentic, tactile physical-object visual language:
   - Excises stumbles, false starts, and repeated takes.
   - **Anti-Arm-Reach Cutoff**: Identifies the calm frame after the last spoken word and stops cleanly before the speaker reaches out to turn off the camera.
 - **Natural Camera Exposure & Skin Tone Grading**:
-  - Eliminates over-white highlight blowout from 10-bit Apple HLG / BT.2020 camera footage without artificial yellow or chalky white discoloration.
-  - Standard SDR tonemapping and gamma compression filter chain:
-    `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,eq=gamma=0.88:contrast=0.96:brightness=-0.025:saturation=0.99,unsharp=5:5:0.25:5:5:0.10`
-  - Yields rich, healthy, natural skin tones (R ~ 128, G ~ 119, B ~ 111) with zero blown-out pixels.
+  - Eliminates over-white highlight blowout from 10-bit Apple HLG / BT.2020 camera footage with gentle gamma compression and selective color balance.
+  - Standard SDR tonemapping and reddish-warmth filter chain:
+    `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,eq=gamma=0.85:contrast=0.95:brightness=-0.035:saturation=1.02,colorbalance=rh=0.04:gh=-0.02:bh=-0.03:rm=0.03:gm=-0.01:bm=-0.02:pl=1,unsharp=5:5:0.25:5:5:0.10`
+  - Yields rich, healthy, reddish hemoglobin glow (R ~ 124, G ~ 108, B ~ 96) with zero blown-out pixels above 248.
 - **Safe Layout Geometry & Zero-Overlap Guarantee**:
-  - When the lowered cutout speaker is active at `y >= 650`, all graphic elements (notebook cutoffs, slips, chips, curves, tags) must strictly reside in the safe upper zone `y = 110..530`.
+  - Safe mobile Reels/TikTok top margin buffer: `y = 0..158` (leaves room for search bar, camera notch, and audio pills).
+  - Reference academic notebook cutoffs strictly anchored at `NOTE_Y_SPEAKER = 230` (`y = 158..302`).
+  - Secondary tactile objects, chips, and curve plots placed in `y = 315..620` with zero overlap.
+  - Speaker cutout active at `y >= 680..720`.
   - All chip and notebook bounding boxes (`label_chip`, `notebook_cutoff`) auto-expand dynamically with at least 32px safe horizontal padding, mathematically guaranteeing zero text clipping.
-- **Natural Broadcast Audio Mastering (Zero 'Deep Hole' Boxiness)**:
-  - Strict prohibition against heavy FFT spectral noise cancellation (`afftdn=nr=24`) and aggressive downward gates (`agate`), which cause watery phase artifacts, comb filtering, and hollow barrel resonance.
-  - Clean, transparent broadcast vocal chain:
-    `highpass=f=75,equalizer=f=220:t=q:w=1.0:g=-1.0,equalizer=f=3800:t=q:w=1.0:g=1.5,acompressor=threshold=-18dB:ratio=2.2:attack=15:release=100:makeup=2.0dB,loudnorm=I=-11.5:LRA=6.0:TP=-0.5`
-  - Preserves natural acoustic room air, chest warmth, and vocal presence mastered to **-11.5 LUFS**.
+- **Natural Broadcast Audio Mastering & Room Hiss Suppression**:
+  - Strict prohibition against heavy FFT spectral noise cancellation (`afftdn=nr=24`) and aggressive downward gates (`agate`), which cause watery phase artifacts and hollow barrel resonance.
+  - Clean, transparent broadcast vocal chain with gentle, smooth hiss reduction (`afftdn=nr=10:nf=-52:tn=1:gs=5`) and `lowpass=f=14000`:
+    `highpass=f=75,lowpass=f=14000,afftdn=nr=10:nf=-52:tn=1:gs=5,equalizer=f=220:t=q:w=1.0:g=-1.0,equalizer=f=3800:t=q:w=1.0:g=1.5,acompressor=threshold=-18dB:ratio=2.2:attack=15:release=100:makeup=2.0dB,loudnorm=I=-11.5:LRA=6.0:TP=-0.5`
+  - Drops room preamp hiss during pauses from -45 dB to -51 dB while preserving full vocal tone and chest resonance mastered to **-11.5 LUFS**.
   - **Background Music**: Warm ambient music bed (`ambient_bed.wav`) low-passed at `850 Hz` at `volume=0.045`.
   - **Keyframe-Locked SFX**: Micro-accents (`0.036..0.048` volume) synchronized to object reveal milestones (`paper_turn.wav`, `cash_chime.wav`, `tech_tick.wav`, `subtle_whoosh.wav`).
 

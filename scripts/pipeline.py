@@ -245,7 +245,8 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     # 1. Base Video Grading + Split Speaker Crop for Bottom Half
     filter_chains = [
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-        "eq=gamma=0.88:contrast=0.96:brightness=-0.025:saturation=0.99,"
+        "eq=gamma=0.85:contrast=0.95:brightness=-0.035:saturation=1.02,"
+        "colorbalance=rh=0.04:gh=-0.02:bh=-0.03:rm=0.03:gm=-0.01:bm=-0.02:pl=1,"
         f"unsharp=5:5:0.25:5:5:0.10,format=yuv420p,split=2[v_full][v_crop_src]",
         f"[v_crop_src]crop=1080:{spk_h}:0:{speaker_crop_y}[v_spk_bot]"
     ]
@@ -293,7 +294,8 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     # 4. Clean Broadcast Voice Mastering (-11.5 LUFS) + Background Music + Motion SFX
     a_final = "a_prod"
     voice_chain = (
-        "[0:a]highpass=f=75,"
+        "[0:a]highpass=f=75,lowpass=f=14000,"
+        "afftdn=nr=10:nf=-52:tn=1:gs=5,"
         "equalizer=f=220:t=q:w=1.0:g=-1.0,"
         "equalizer=f=3800:t=q:w=1.0:g=1.5,"
         "acompressor=threshold=-18dB:ratio=2.2:attack=15:release=100:makeup=2.0dB,"
