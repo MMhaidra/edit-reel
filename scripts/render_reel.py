@@ -183,10 +183,13 @@ def build_sprite_bank():
     bank["F46"] = F(46)
     bank["F44"] = F(44)
     bank["F42"] = F(42)
+    bank["F40"] = F(40)
     bank["F38"] = F(38)
     bank["F36"] = F(36)
     bank["F34"] = F(34)
     bank["F32"] = F(32)
+    bank["F30"] = F(30)
+    bank["F28"] = F(28)
 
 
     # Unemployment Crisis Notebook cutoffs
