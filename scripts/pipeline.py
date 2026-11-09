@@ -193,7 +193,7 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     with open(overlays_manifest_path, "r", encoding="utf-8") as f:
         overlays = json.load(f)
 
-    is_arabic = lang in ["ar", "ary", "darija", "moroccan", "he", "fa", "ur"]
+    is_arabic = lang in ["ary", "darija", "moroccan"]
     split_y = 920
     spk_h = 1920 - split_y
 
@@ -246,9 +246,8 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     filter_chains = [
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
         "smartblur=lr=1.2:ls=-0.25:lt=-3.0:cr=0.8:cs=-0.15:ct=-2.0,"
-        "eq=contrast=1.06:brightness=0.025:saturation=1.09,"
-        "colorbalance=rs=0.02:gs=0.0:bs=-0.02:rm=0.03:gm=0.0:bm=-0.02,"
-        f"unsharp=5:5:0.6:5:5:0.25,format=yuv420p,split=2[v_full][v_crop_src]",
+        "eq=contrast=1.01:brightness=0.0:saturation=1.0,"
+        f"unsharp=5:5:0.35:5:5:0.15,format=yuv420p,split=2[v_full][v_crop_src]",
         f"[v_crop_src]crop=1080:{spk_h}:0:{speaker_crop_y}[v_spk_bot]"
     ]
 
@@ -538,7 +537,7 @@ def main():
     parser.add_argument("--input", "-i", help="Path to single raw video file")
     parser.add_argument("--input-folder", "-f", default=str(DEFAULT_REELS_DIR), help="Folder with raw videos")
     parser.add_argument("--output-dir", "-o", default=str(DEFAULT_REELS_DIR / "edited_output"), help="Output directory")
-    parser.add_argument("--lang", "-l", default="en", help="Language code (e.g. en, es, zh, hi, ar, fr, pt, de, ja, it, ko, ru, darija)")
+    parser.add_argument("--lang", "-l", default="en", choices=["en", "darija", "ary"], help="Language: en or darija")
     parser.add_argument("--script", "-s", default=None, help="Optional path to reference script file (.txt, .md, .docx)")
     parser.add_argument("--script-text", default=None, help="Optional inline reference script text")
     parser.add_argument("--bgm-vol", type=float, default=0.045, help="Background music volume (default: 0.045)")

@@ -188,6 +188,63 @@ def build_sprite_bank():
     bank["F34"] = F(34)
     bank["F32"] = F(32)
 
+
+    # Unemployment Crisis Notebook cutoffs
+    bank["note_bls_freeze"] = bake_sprite(V.notebook_cutoff("BLS (OCTOBER 2026) • THE LOW-HIRE FREEZE", "U.S. Bureau of Labor Statistics", "Headline 4.1% Unemployment vs Locked Doors", w=640, h=145), rot=-1.0)
+    bank["note_bls_2m"] = bake_sprite(V.notebook_cutoff("BLS SERIES LNS13008275 • HISTORIC SPIKE", "Seasonally Adjusted Data Through Oct 2026", "Nearly 2 Million Americans Unemployed >6 Months", w=660, h=145), rot=1.0)
+    bank["note_shift_bar"] = bake_sprite(V.notebook_cutoff("BLS 2-YEAR STRUCTURAL SHIFT (2024–2026)", "Share of Job Seekers Unemployed 27+ Weeks", "October 2024 (22.8%) vs October 2026 (27.6%)", w=660, h=145), rot=-1.0)
+    bank["note_duration_avg"] = bake_sprite(V.notebook_cutoff("AVERAGE UNEMPLOYMENT DURATION (BLS)", "Series LNS13008276 • Average Weeks Unemployed", "Climbed from 22 Weeks (2025) to >26 Weeks (2026)", w=660, h=145), rot=1.0)
+    bank["note_hysteresis"] = bake_sprite(V.notebook_cutoff("NBER MACROECONOMICS ANNUAL (1986)", "Olivier Blanchard & Lawrence Summers", "Hysteresis: Permanent Skill Decay & Lost Pricing Power", w=660, h=145), rot=-1.0)
+
+    # Herbert Marcuse & False Needs Notebook cutoffs
+    bank["note_marcuse"] = bake_sprite(V.notebook_cutoff("BEACON PRESS (1964) • ONE-DIMENSIONAL MAN", "Herbert Marcuse • Advanced Industrial Society", "Manufactured Desires & The Illusion of Choice", w=640, h=145), rot=-1.0)
+    bank["note_brickman"] = bake_sprite(V.notebook_cutoff("J. PERSONALITY & SOCIAL PSYCHOLOGY (1978)", "Philip Brickman, Dan Coates & Ronnie Janoff-Bulman", "Lottery Winners & Victims: Is Happiness Relative?", w=660, h=145), rot=1.0)
+    bank["note_kasser"] = bake_sprite(V.notebook_cutoff("J. PERSONALITY & SOCIAL PSYCHOLOGY (1993)", "Tim Kasser & Richard M. Ryan", "A Dark Side of the American Dream: Material Aspiration", w=660, h=145), rot=-1.0)
+    bank["note_bauer"] = bake_sprite(V.notebook_cutoff("PSYCHOLOGICAL SCIENCE (2012) • CUING CONSUMERISM", "Monika A. Bauer, James E. B. Wilkie et al.", "Situational Materialism Undermines Personal Well-Being", w=660, h=145), rot=1.0)
+
+    # Unemployment tags & chips
+    tag_rate_raw, (ex_r, ey_r) = V.draw_tag(360, 480, ["4.1%", "HEADLINE RATE"], [F(108), F(32)], [V.GREEN, V.INK_SOFT])
+    bank["tag_headline_rate"] = bake_sprite(tag_rate_raw, rot=-2.0)
+    bank["tag_headline_rate_ey"] = ey_r
+    bank["tag_headline_rate_h"] = tag_rate_raw.height / V.S
+
+    bank["chip_freeze"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "LOW-HIRE FREEZE", F(38), w=500, h=135), rot=1.5)
+    bank["chip_doors_locked"] = bake_sprite(V.label_chip(None, "LOCKED DOORS", F(38), w=440, h=110), rot=-1.5)
+
+    tag2m_raw, (ex2m, ey2m) = V.draw_tag(420, 500, [" ", " "], [F(96), F(34)])
+    bank["tag2m_blank"] = bake_sprite(tag2m_raw, rot=1.5, shadow=True)
+    bank["tag2m_ey"] = ey2m
+    bank["tag2m_h"] = tag2m_raw.height / V.S
+    bank["chip_historic_spike"] = bake_sprite(V.label_chip(None, "HISTORIC SPIKE", F(36), w=440, h=110), rot=-1.5)
+
+    bank["chip_shift_surge"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "+4.8% LONG-TERM SHIFT", F(38), w=560, h=135), rot=1.0)
+
+    bank["chip_22wks"] = bake_sprite(V.label_chip(None, "2025: 22 WEEKS", F(34), w=400, h=110), rot=-1.0)
+    bank["chip_26wks"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "2026: 26.4 WEEKS", F(34), w=440, h=110), rot=1.5)
+    bank["chip_half_year"] = bake_sprite(V.label_chip(None, "> HALF A YEAR TO GET HIRED", F(36), w=560, h=120), rot=-1.0)
+
+    bank["slip_hysteresis"] = bake_sprite(V.paper_slip("HYSTERESIS // تآكل المهارات", F(46)), rot=-1.0)
+    bank["chip_skill_erosion"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "SKILL EROSION", F(38), w=480, h=130), rot=-1.5)
+    bank["chip_pricing_power"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "LOST PRICING POWER", F(36), w=500, h=130), rot=1.5)
+
+    # Herbert Marcuse & False Needs tags & chips
+    bank["chip_auto"] = bake_sprite(V.label_chip(None, "AUTOMOBILE", F(36), w=360, h=100), rot=-2.0)
+    bank["chip_tech"] = bake_sprite(V.label_chip(None, "SOUND SYSTEM", F(34), w=380, h=100), rot=1.5)
+    bank["chip_home"] = bake_sprite(V.label_chip(None, "SPLIT-LEVEL HOME", F(32), w=420, h=100), rot=-1.0)
+    bank["slip_false_needs"] = bake_sprite(V.paper_slip("FALSE NEEDS // الاحتياجات المزيفة", F(44)), rot=1.0)
+
+    bank["slip_hedonic_brickman"] = bake_sprite(V.paper_slip("HEDONIC TREADMILL // دولاب التعود", F(46)), rot=-1.5)
+    bank["chip_spike"] = bake_sprite(V.label_chip(V.draw_arrow(90, True, V.GREEN), "DOPAMINE SPIKE", F(38), w=460, h=120), rot=-2.0)
+    bank["chip_baseline"] = bake_sprite(V.label_chip(None, "ADAPTATION RESET", F(36), w=440, h=110), rot=1.5)
+
+    bank["slip_dark_side"] = bake_sprite(V.paper_slip("A DARK SIDE OF THE AMERICAN DREAM", F(40)), rot=-1.0)
+    bank["chip_anxiety"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "↑ ANXIETY & DEPRESSION", F(36), w=520, h=130), rot=1.5)
+    bank["chip_material_goals"] = bake_sprite(V.label_chip(None, "STATUS & MONEY AS MAIN GOAL", F(32), w=520, h=110), rot=-1.0)
+
+    bank["slip_cuing_consumerism"] = bake_sprite(V.paper_slip("CUING CONSUMERISM (2012)", F(44)), rot=1.0)
+    bank["chip_ind_to_cons"] = bake_sprite(V.label_chip(None, "INDIVIDUAL  →  CONSUMER", F(38), w=540, h=130), rot=-1.5)
+    bank["chip_stress_spike"] = bake_sprite(V.label_chip(V.draw_arrow(90, False, V.RED), "↑ STRESS & INSECURITY", F(36), w=520, h=125), rot=2.0)
+
     return bank
 
 
@@ -342,6 +399,184 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         p_norm = ease_out_back(min(1.0, max(0.0, (el - 1.25) / 0.45))) * fade_out
         paste_sprite(canvas, bank["chip_car"], 330, 370, offset_y=(1.0 - p_car) * 35, opacity=min(1.0, p_car))
         paste_sprite(canvas, bank["chip_norm"], 790, 620, offset_y=(1.0 - p_norm) * 35, opacity=min(1.0, p_norm))
+
+
+    elif btype == "unemployment_iceberg":
+        # Beat 1 (Unemployment): Notebook cutoff + 4.1% Headline tag + Low-Hire Freeze chip
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_bls_freeze"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p_tag = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.50))) * fade_out
+        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.35) / 0.45))) * fade_out
+        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.55) / 0.45))) * fade_out
+
+        ep = ease_out_back(p_tag, s=1.15)
+        cur_top_y = TAG_TOP_SPEAKER - (1.0 - ep) * 480.0
+        d = ImageDraw.Draw(canvas)
+        eyelet_y = cur_top_y + (bank["tag_headline_rate_ey"] - 10 / V.S)
+        if eyelet_y > STRING_TO_SPEAKER:
+            d.line([(270, STRING_TO_SPEAKER), (270, int(eyelet_y))], fill=(70, 62, 54, 255), width=3)
+        paste_sprite(canvas, bank["tag_headline_rate"], 270, cur_top_y + bank["tag_headline_rate_h"] / 2 - 10 / V.S, opacity=min(1.0, p_tag * 2.5))
+
+        paste_sprite(canvas, bank["chip_freeze"], 780, 360, offset_y=(1.0 - p_c1) * 50, opacity=min(1.0, p_c1))
+        paste_sprite(canvas, bank["chip_doors_locked"], 780, 540, offset_y=(1.0 - p_c2) * 50, opacity=min(1.0, p_c2))
+
+    elif btype == "jobless_2m_curve":
+        # Beat 2 (Unemployment): Notebook cutoff + Loading 2M counter tag + Historic Spike
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_bls_2m"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p_tag = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.55))) * fade_out
+        sway = math.sin(el * 2.6) * 7.0 * math.exp(-el * 0.35)
+
+        load_p = ease_out_cubic(min(1.0, max(0.0, (el - 0.20) / 0.95)))
+        val = int(1950000 * load_p)
+        txt1 = f"{val:,}" if val < 1950000 else "1,950,000"
+        txt2 = "JOBLESS >6 MOS" if load_p >= 0.85 else "COUNTING..."
+        c2 = V.RED if load_p >= 0.85 else V.INK_SOFT
+        draw_hanging_tag_with_text(canvas, bank["tag2m_blank"], bank["tag2m_ey"], bank["tag2m_h"], 420 + sway, TAG_TOP_SPEAKER, p_tag, txt1, txt2, bank["F64"], bank["F34"], V.INK, c2, string_to=STRING_TO_SPEAKER)
+
+        p_c = ease_out_back(min(1.0, max(0.0, (el - 0.45) / 0.45))) * fade_out
+        paste_sprite(canvas, bank["arrow_up_big"], 820, 390, offset_y=(1.0 - p_c) * 50, opacity=min(1.0, p_c))
+        paste_sprite(canvas, bank["chip_historic_spike"], 820, 560, offset_y=(1.0 - p_c) * 50, opacity=min(1.0, p_c))
+
+    elif btype == "long_term_shift_bar":
+        # Beat 3 (Unemployment): Notebook cutoff + 2-Year Shift Bars (Oct 2024: 22.8% vs Oct 2026: 27.6%)
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_shift_bar"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p_bar = ease_out_cubic(min(1.0, max(0.0, (el - 0.20) / 0.80))) * fade_out
+        p_chip = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
+
+        d = ImageDraw.Draw(canvas)
+        y1 = 360
+        V.text_c(canvas, 240, y1, "OCT 2024", bank["F36"], V.INK_SOFT)
+        w1_max = 480
+        w1 = int(w1_max * (22.8 / 32.0) * min(1.0, p_bar))
+        d.rounded_rectangle([340, y1 - 22, 340 + w1, y1 + 22], radius=12, fill=(100, 116, 139, 240))
+        if p_bar > 0.4:
+            d.text((340 + w1 + 18, y1 - 18), "22.8%", font=bank["F36"], fill=V.INK)
+
+        y2 = 470
+        V.text_c(canvas, 240, y2, "OCT 2026", bank["F36"], V.INK)
+        w2 = int(w1_max * (27.6 / 32.0) * min(1.0, p_bar))
+        d.rounded_rectangle([340, y2 - 24, 340 + w2, y2 + 24], radius=12, fill=V.RED + (240,))
+        if p_bar > 0.4:
+            d.text((340 + w2 + 18, y2 - 20), "27.6%", font=bank["F42"], fill=V.RED)
+
+        paste_sprite(canvas, bank["chip_shift_surge"], 540, 620, offset_y=(1.0 - p_chip) * 40, opacity=min(1.0, p_chip))
+
+    elif btype == "unemployment_duration_timeline":
+        # Beat 4 (Unemployment): Notebook cutoff + Average Duration 22.1 wks -> 26.4 wks (>6 months)
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_duration_avg"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p_line = ease_out_cubic(min(1.0, max(0.0, (el - 0.20) / 0.85))) * fade_out
+        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.45) / 0.45))) * fade_out
+        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.70) / 0.45))) * fade_out
+
+        paste_sprite(canvas, bank["chip_22wks"], 290, 380, offset_y=(1.0 - p_c1) * 40, opacity=min(1.0, p_c1))
+        paste_sprite(canvas, bank["chip_26wks"], 790, 380, offset_y=(1.0 - p_c2) * 40, opacity=min(1.0, p_c2))
+
+        d = ImageDraw.Draw(canvas)
+        lx0, lx1, ly = 460, 620, 380
+        if p_line > 0.1:
+            cur_lx = lx0 + int((lx1 - lx0) * min(1.0, p_line))
+            d.line([(lx0, ly), (cur_lx, ly)], fill=V.RED + (255,), width=6)
+
+        paste_sprite(canvas, bank["chip_half_year"], 540, 560, offset_y=(1.0 - p_c2) * 40, opacity=min(1.0, p_c2))
+
+    elif btype == "hysteresis_card":
+        # Beat 5 (Unemployment): Notebook cutoff + Hysteresis Term Card + Skill Erosion Chips
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_hysteresis"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
+        paste_sprite(canvas, bank["slip_hysteresis"], 540, 320, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+
+        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.35) / 0.45))) * fade_out
+        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
+        paste_sprite(canvas, bank["chip_skill_erosion"], 300, 510, offset_y=(1.0 - p_c1) * 40, opacity=min(1.0, p_c1))
+        paste_sprite(canvas, bank["chip_pricing_power"], 770, 510, offset_y=(1.0 - p_c2) * 40, opacity=min(1.0, p_c2))
+
+    elif btype == "marcuse_false_needs":
+        # Beat 1 (Marcuse): Notebook cutoff + False Needs slip + 3 Commodity Chips
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_marcuse"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
+        paste_sprite(canvas, bank["slip_false_needs"], 540, 310, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+
+        p1 = ease_out_back(min(1.0, max(0.0, (el - 0.30) / 0.45))) * fade_out
+        p2 = ease_out_back(min(1.0, max(0.0, (el - 0.45) / 0.45))) * fade_out
+        p3 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
+
+        paste_sprite(canvas, bank["chip_auto"], 280, 470, offset_y=(1.0 - p1) * 40, opacity=min(1.0, p1))
+        paste_sprite(canvas, bank["chip_tech"], 790, 470, offset_y=(1.0 - p2) * 40, opacity=min(1.0, p2))
+        paste_sprite(canvas, bank["chip_home"], 540, 610, offset_y=(1.0 - p3) * 40, opacity=min(1.0, p3))
+
+    elif btype == "brickman_hedonic_treadmill":
+        # Beat 2 (Marcuse): Notebook cutoff + Hedonic Treadmill dopamine spike & reset
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_brickman"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
+        paste_sprite(canvas, bank["slip_hedonic_brickman"], 540, 310, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+
+        d = ImageDraw.Draw(canvas)
+        base_y, x0, x1 = 660, 140, 940
+        d.line([(x0, base_y), (x1, base_y)], fill=V.GOLD + (255,), width=5)
+        V.text_c(canvas, 330, base_y + 30, "HAPPINESS BASELINE", bank["F32"], V.GOLD)
+
+        curve_p = ease_in_out_cubic(min(1.0, max(0.0, (el - 0.25) / 1.5)))
+        n_pts = max(2, int(75 * curve_p))
+        if n_pts >= 2 and curve_p > 0.02:
+            pts = []
+            for k in range(n_pts):
+                u = k / 74.0
+                px = x0 + 20 + u * (x1 - x0 - 40)
+                if u < 0.22:
+                    py = base_y - math.sin(u / 0.22 * math.pi / 2.0) * 230.0
+                else:
+                    py = base_y - math.exp(-(u - 0.22) * 6.5) * 230.0
+                pts.append((px, py))
+            V.ink_line(canvas, pts, V.GREEN, 10)
+
+        p_spike = ease_out_back(min(1.0, max(0.0, (el - 0.50) / 0.40))) * fade_out
+        p_base = ease_out_back(min(1.0, max(0.0, (el - 1.10) / 0.45))) * fade_out
+        paste_sprite(canvas, bank["chip_spike"], 320, 400, offset_y=(1.0 - p_spike) * 35, opacity=min(1.0, p_spike))
+        paste_sprite(canvas, bank["chip_baseline"], 780, 560, offset_y=(1.0 - p_base) * 35, opacity=min(1.0, p_base))
+
+    elif btype == "kasser_ryan_dark_side":
+        # Beat 3 (Marcuse): Notebook cutoff with yellow highlighter wipe + Anxiety chip
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_kasser"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        # Animated yellow highlighter stroke across notebook cutoff title
+        p_high = ease_out_cubic(min(1.0, max(0.0, (el - 0.35) / 0.90)))
+        if p_high > 0.05:
+            d = ImageDraw.Draw(canvas, "RGBA")
+            hx0, hx1 = 240, 240 + int(600 * p_high)
+            hy = NOTE_Y_SPEAKER + 22
+            d.rectangle([hx0, hy - 14, hx1, hy + 14], fill=(254, 240, 138, 140))
+
+        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.30) / 0.45))) * fade_out
+        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
+        paste_sprite(canvas, bank["chip_material_goals"], 540, 380, offset_y=(1.0 - p_c1) * 40, opacity=min(1.0, p_c1))
+        paste_sprite(canvas, bank["chip_anxiety"], 540, 560, offset_y=(1.0 - p_c2) * 40, opacity=min(1.0, p_c2))
+
+    elif btype == "bauer_cuing_consumerism":
+        # Beat 4 (Marcuse): Notebook cutoff + Individual -> Consumer chip + Stress Spike
+        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
+        paste_sprite(canvas, bank["note_bauer"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+
+        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
+        paste_sprite(canvas, bank["slip_cuing_consumerism"], 540, 310, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+
+        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.35) / 0.45))) * fade_out
+        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.65) / 0.45))) * fade_out
+        paste_sprite(canvas, bank["chip_ind_to_cons"], 540, 440, offset_y=(1.0 - p_c1) * 40, opacity=min(1.0, p_c1))
+        paste_sprite(canvas, bank["chip_stress_spike"], 540, 600, offset_y=(1.0 - p_c2) * 40, opacity=min(1.0, p_c2))
 
     elif btype == "three_pillars":
         # Beat 7: Notebook cutoff + 3 hanging tags synced to step_timestamps
@@ -520,8 +755,8 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
         "ffmpeg", "-v", "error", "-i", str(cleaned_video),
         "-vf", (
             "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-            "eq=contrast=1.05:brightness=0.02:saturation=1.06,"
-            "unsharp=5:5:0.5:5:5:0.2"
+            "eq=contrast=1.01:brightness=0.0:saturation=1.0,"
+            "unsharp=5:5:0.35:5:5:0.15"
         ),
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-"
     ]

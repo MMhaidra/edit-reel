@@ -68,6 +68,263 @@ def find_word_timestamp(all_words, phrases, default_t, min_t=0.0):
     return round(default_t, 2)
 
 
+def build_unemployment_storyboard(all_words, total_duration, lang="en"):
+    """
+    Builds an acoustic-word-locked Beat Map for the 'Hidden Unemployment Crisis' script
+    (English & Moroccan Darija) with State 2 'Paper & Objects' aesthetic.
+    """
+    if lang in ["ary", "darija", "moroccan"]:
+        t_freeze = find_word_timestamp(all_words, ["تجميد التوظيف", "تجميد", "طرد", "البيبان مسدودة"], 21.0, min_t=12.0)
+        t_2m = find_word_timestamp(all_words, ["جوج د المليون", "مليون", "مكتب إحصائيات", "أكتوبر 2026"], 45.0, min_t=t_freeze + 10.0)
+        t_shift = find_word_timestamp(all_words, ["سبعة وعشرين", "27", "22.8", "العاطلين"], 62.0, min_t=t_2m + 10.0)
+        t_duration = find_word_timestamp(all_words, ["المعدل المتوسط", "اثنين وعشرين", "ستة وعشرين", "نص عام"], 80.0, min_t=t_shift + 10.0)
+        t_hysteresis = find_word_timestamp(all_words, ["تآكل المهارات", "تآكل", "المهارات", "القيمة التفاوضية"], 105.0, min_t=t_duration + 10.0)
+        t_outro = find_word_timestamp(all_words, ["الحماية الحقيقية", "احتياط مالي", "داكشي علاش"], 125.0, min_t=t_hysteresis + 12.0)
+    else:
+        t_freeze = find_word_timestamp(all_words, ["freeze", "low-hire", "mass layoffs", "lagging"], 24.0, min_t=14.0)
+        t_2m = find_word_timestamp(all_words, ["two million", "bureau of labor", "labor statistics", "six months"], 50.0, min_t=t_freeze + 12.0)
+        t_shift = find_word_timestamp(all_words, ["twenty-seven", "27.6", "22.8", "share of job seekers"], 68.0, min_t=t_2m + 12.0)
+        t_duration = find_word_timestamp(all_words, ["average stretch", "twenty-two", "twenty-six", "half a year"], 85.0, min_t=t_shift + 12.0)
+        t_hysteresis = find_word_timestamp(all_words, ["hysteresis", "sidelines", "skills", "pricing power"], 110.0, min_t=t_duration + 12.0)
+        t_outro = find_word_timestamp(all_words, ["never let", "flattering headline", "cash runway", "protection"], 132.0, min_t=t_hysteresis + 12.0)
+
+    cues = [
+        {
+            "beat_id": 1,
+            "idea": "The Low-Hire, Low-Fire Freeze & Headline Deception",
+            "domain": "unemployment_iceberg",
+            "template": "unemployment_iceberg",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "U.S. BUREAU OF LABOR STATISTICS • MACROECONOMIC LAGGING INDICATOR",
+            "headline": "Headline unemployment looks low, but hiring is quietly locked shut.",
+            "title": "LOW-HIRE FREEZE",
+            "badge": "BLS MACRO DATA",
+            "citation": {
+                "journal": "U.S. BUREAU OF LABOR STATISTICS (OCTOBER 2026)",
+                "title": "Current Population Survey: The Low-Hire, Low-Fire Phenomenon",
+                "authors": "Macroeconomic Indicator Analysis • Labor Force Dynamics"
+            },
+            "start_time": t_freeze,
+            "end_time": max(t_freeze + 14.0, t_2m - 1.2)
+        },
+        {
+            "beat_id": 2,
+            "idea": "Nearly 2 Million Americans Unemployed >6 Months",
+            "domain": "jobless_2m_curve",
+            "template": "jobless_2m_curve",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "BLS HISTORICAL SERIES LNS13008275 (1948–2026)",
+            "headline": "Nearly 2,000,000 workers are now stuck in long-term unemployment.",
+            "title": "2M LONG-TERM JOBLESS",
+            "badge": "HISTORIC SPIKE",
+            "citation": {
+                "journal": "BLS SERIES LNS13008275 • UNEMPLOYED 27 WEEKS & OVER",
+                "title": "Seasonally Adjusted Number of Long-Term Unemployed Persons",
+                "authors": "U.S. Department of Labor Statistics • CPS Data Release"
+            },
+            "start_time": t_2m,
+            "end_time": max(t_2m + 14.0, t_shift - 1.2)
+        },
+        {
+            "beat_id": 3,
+            "idea": "2-Year Structural Shift: 22.8% to 27.6% (Oct 2024 vs Oct 2026)",
+            "domain": "long_term_shift_bar",
+            "template": "long_term_shift_bar",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "BLS 24-MONTH COMPARISON (OCTOBER 2024 vs OCTOBER 2026)",
+            "headline": "The share of long-term job seekers jumped +4.8% in just 2 years.",
+            "title": "22.8% → 27.6% SURGE",
+            "badge": "+4.8% SHIFT",
+            "citation": {
+                "journal": "BLS COMPARATIVE COHORT ANALYSIS (2024–2026)",
+                "title": "Distribution of Total Unemployed by Duration of Unemployment",
+                "authors": "CPS Historical Series • 27 Weeks and Longer Cohort"
+            },
+            "start_time": t_shift,
+            "end_time": max(t_shift + 14.0, t_duration - 1.2)
+        },
+        {
+            "beat_id": 4,
+            "idea": "Average Unemployment Duration Surpasses 26 Weeks (>6 Months)",
+            "domain": "unemployment_duration_timeline",
+            "template": "unemployment_duration_timeline",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "BLS SERIES LNS13008276 • AVERAGE WEEKS UNEMPLOYED",
+            "headline": "Losing a job now means waiting more than half a year for a paycheck.",
+            "title": "AVERAGE >26 WEEKS",
+            "badge": ">6 MONTHS",
+            "citation": {
+                "journal": "BLS SERIES LNS13008276 • AVERAGE DURATION OF UNEMPLOYMENT",
+                "title": "Mean Weeks Unemployed: Rapid Climb from 22 to 26+ Weeks",
+                "authors": "Bureau of Labor Statistics • National Labor Force Estimates"
+            },
+            "start_time": t_duration,
+            "end_time": max(t_duration + 14.0, t_hysteresis - 1.2)
+        },
+        {
+            "beat_id": 5,
+            "idea": "Hysteresis: Skill Decay and Permanent Financial Damage",
+            "domain": "hysteresis_card",
+            "template": "hysteresis_card",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "NBER MACROECONOMICS ANNUAL (BLANCHARD & SUMMERS 1986)",
+            "headline": "The longer workers wait, the faster skills, networks & pricing power erode.",
+            "title": "HYSTERESIS DECAY",
+            "badge": "SKILL EROSION",
+            "citation": {
+                "journal": "NBER MACROECONOMICS ANNUAL (VOL. 1, PP. 15–78)",
+                "title": "Hysteresis and the European Unemployment Problem",
+                "authors": "Olivier J. Blanchard & Lawrence H. Summers (1986)"
+            },
+            "start_time": t_hysteresis,
+            "end_time": max(t_hysteresis + 16.0, t_outro - 0.8)
+        }
+    ]
+
+    valid_cues = []
+    safe_end_limit = max(10.0, total_duration - 4.5)
+    for c in cues:
+        st = round(max(2.6, float(c["start_time"])), 2)
+        if valid_cues and st < valid_cues[-1]["end_time"] + 1.1:
+            st = round(valid_cues[-1]["end_time"] + 1.1, 2)
+        raw_en = float(c["end_time"])
+        en = round(min(safe_end_limit, min(st + 16.0, max(st + 6.0, raw_en))), 2)
+        if en - st >= 4.5 and st < safe_end_limit - 3.5:
+            c["start_time"] = st
+            c["end_time"] = en
+            c["duration"] = round(en - st, 2)
+            c["layout_mode"] = "split"
+            c["split_height"] = 920
+            c["animation_type"] = c["template"]
+            c["custom_render"] = True
+            valid_cues.append(c)
+
+    return valid_cues
+
+
+def build_false_needs_storyboard(all_words, total_duration, lang="en"):
+    """
+    Builds an acoustic-word-locked Beat Map for Herbert Marcuse's 'False Needs' & Consumerism
+    (English & Moroccan Darija) with State 2 'Paper & Objects' aesthetic.
+    """
+    if lang in ["ary", "darija", "moroccan"]:
+        t_marcuse = find_word_timestamp(all_words, ["ماركوز", "البعد الواحد", "الاحتياجات المزيفة", "الطوموبيل"], 13.0, min_t=8.0)
+        t_brickman = find_word_timestamp(all_words, ["بريكمان", "دولاب التعود", "1978", "التعود المادي"], 36.0, min_t=t_marcuse + 10.0)
+        t_kasser = find_word_timestamp(all_words, ["تيم كاسر", "كاسر", "الجانب المظلم", "الحلم الأمريكي"], 56.0, min_t=t_brickman + 10.0)
+        t_bauer = find_word_timestamp(all_words, ["مونيكا باور", "باور", "مستهلك", "العلوم النفسية"], 78.0, min_t=t_kasser + 10.0)
+        t_outro = find_word_timestamp(all_words, ["ماركوز حذرنا", "كنخسرو الحرية", "قبل ما تجري"], 100.0, min_t=t_bauer + 10.0)
+    else:
+        t_marcuse = find_word_timestamp(all_words, ["marcuse", "one-dimensional", "false needs", "automobile"], 14.0, min_t=9.0)
+        t_brickman = find_word_timestamp(all_words, ["brickman", "hedonic", "treadmill", "1978", "lottery"], 38.0, min_t=t_marcuse + 10.0)
+        t_kasser = find_word_timestamp(all_words, ["kasser", "dark side", "american dream", "1993", "vitality"], 58.0, min_t=t_brickman + 10.0)
+        t_bauer = find_word_timestamp(all_words, ["bauer", "psychological science", "cuing", "consumer", "2012"], 80.0, min_t=t_kasser + 10.0)
+        t_outro = find_word_timestamp(all_words, ["marcuse warned", "lose our freedom", "pause and ask"], 102.0, min_t=t_bauer + 10.0)
+
+    cues = [
+        {
+            "beat_id": 1,
+            "idea": "Herbert Marcuse (1964): One-Dimensional Man & Manufactured False Needs",
+            "domain": "marcuse_false_needs",
+            "template": "marcuse_false_needs",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "HERBERT MARCUSE (1964) • BEACON PRESS",
+            "headline": "Modern society traps us through manufactured desires we mistake for our own.",
+            "title": "FALSE NEEDS",
+            "badge": "MARCUSE 1964",
+            "citation": {
+                "journal": "BEACON PRESS • BOSTON (1964)",
+                "title": "One-Dimensional Man: Studies in the Ideology of Advanced Industrial Society",
+                "authors": "Herbert Marcuse (Chapter 1: The New Forms of Control)"
+            },
+            "start_time": t_marcuse,
+            "end_time": max(t_marcuse + 15.0, t_brickman - 1.2)
+        },
+        {
+            "beat_id": 2,
+            "idea": "Philip Brickman (1978): The Hedonic Treadmill & Dopamine Adaptation",
+            "domain": "brickman_hedonic_treadmill",
+            "template": "brickman_hedonic_treadmill",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY (1978)",
+            "headline": "Financial windfalls lose their emotional rush, forcing an endless upgrade loop.",
+            "title": "HEDONIC TREADMILL",
+            "badge": "BRICKMAN 1978",
+            "citation": {
+                "journal": "J. PERSONALITY & SOCIAL PSYCHOLOGY (VOL. 36, NO. 8, PP. 917–927)",
+                "title": "Lottery winners and accident victims: Is happiness relative?",
+                "authors": "Philip Brickman, Dan Coates & Ronnie Janoff-Bulman (1978)"
+            },
+            "start_time": t_brickman,
+            "end_time": max(t_brickman + 15.0, t_kasser - 1.2)
+        },
+        {
+            "beat_id": 3,
+            "idea": "Kasser & Ryan (1993): A Dark Side of the American Dream",
+            "domain": "kasser_ryan_dark_side",
+            "template": "kasser_ryan_dark_side",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY (1993)",
+            "headline": "Prioritizing material wealth rewires the brain for anxiety and depression.",
+            "title": "DARK SIDE OF WEALTH",
+            "badge": "KASSER & RYAN 1993",
+            "citation": {
+                "journal": "J. PERSONALITY & SOCIAL PSYCHOLOGY (VOL. 65, NO. 2, PP. 410–422)",
+                "title": "A dark side of the American dream: Correlates of financial success",
+                "authors": "Tim Kasser & Richard M. Ryan (1993)"
+            },
+            "start_time": t_kasser,
+            "end_time": max(t_kasser + 15.0, t_bauer - 1.2)
+        },
+        {
+            "beat_id": 4,
+            "idea": "Bauer et al. (2012): Cuing Consumerism & Societal Dissatisfaction",
+            "domain": "bauer_cuing_consumerism",
+            "template": "bauer_cuing_consumerism",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "PSYCHOLOGICAL SCIENCE (BAUER ET AL. 2012)",
+            "headline": "Labeling someone a consumer immediately spikes insecurity and competitiveness.",
+            "title": "INDIVIDUAL → CONSUMER",
+            "badge": "BAUER 2012",
+            "citation": {
+                "journal": "PSYCHOLOGICAL SCIENCE (VOL. 23, NO. 5, PP. 517–523)",
+                "title": "Cuing Consumerism: Situational Materialism Undermines Well-Being",
+                "authors": "Monika A. Bauer, James E. B. Wilkie, Jung K. Kim & Galen V. Bodenhausen"
+            },
+            "start_time": t_bauer,
+            "end_time": max(t_bauer + 15.0, t_outro - 0.8)
+        }
+    ]
+
+    valid_cues = []
+    safe_end_limit = max(10.0, total_duration - 4.5)
+    for c in cues:
+        st = round(max(2.6, float(c["start_time"])), 2)
+        if valid_cues and st < valid_cues[-1]["end_time"] + 1.1:
+            st = round(valid_cues[-1]["end_time"] + 1.1, 2)
+        raw_en = float(c["end_time"])
+        en = round(min(safe_end_limit, min(st + 16.0, max(st + 6.0, raw_en))), 2)
+        if en - st >= 4.5 and st < safe_end_limit - 3.5:
+            c["start_time"] = st
+            c["end_time"] = en
+            c["duration"] = round(en - st, 2)
+            c["layout_mode"] = "split"
+            c["split_height"] = 920
+            c["animation_type"] = c["template"]
+            c["custom_render"] = True
+            valid_cues.append(c)
+
+    return valid_cues
+
+
 def build_money_happiness_storyboard(all_words, total_duration, lang="en"):
     """
     Builds an acoustic-word-locked Beat Map for the 'Money vs Happiness' script
@@ -334,50 +591,70 @@ def plan_storyboard(transcript_data, lang="en", use_ai=True):
 
     full_text = (" ".join(s.get("text", "") for s in segments) + " " + str(transcript_data.get("reference_script", ""))).lower()
 
-    is_money_happiness = any(k in full_text for k in ["kahneman", "killingsworth", "hedonic", "كانيمان", "كوستاريكا", "لوغاريتمية"])
+    is_unemployment = any(k in full_text for k in [
+        "unemployment", "jobless", "hysteresis", "bureau of labor",
+        "بطالة", "تجميد التوظيف", "تآكل المهارات", "مكتب إحصائيات"
+    ])
+    is_false_needs = any(k in full_text for k in [
+        "marcuse", "one-dimensional", "brickman", "kasser", "bauer", "false needs",
+        "ماركوز", "احتياجات مزيفة", "دولاب التعود", "تيم كاسر", "الجانب المظلم", "مونيكا باور"
+    ])
+    is_money_happiness = any(k in full_text for k in [
+        "kahneman", "killingsworth", "hedonic", "كانيمان", "كوستاريكا", "لوغاريتمية"
+    ]) and not is_unemployment and not is_false_needs
 
     post_metadata = {}
     credit_usage = {}
     semantic_highlights = {}
 
-    if use_ai:
-        try:
-            from scripts.vertex_ai_enhancer import enhance_storyboard_with_vertex_ai
-            res = enhance_storyboard_with_vertex_ai(transcript_data, lang=lang)
-            if res:
-                post_metadata = res.get("post_metadata", {})
-                credit_usage = res.get("credit_usage", {})
-                semantic_highlights = res.get("semantic_highlights", {})
-                if not is_money_happiness and res.get("cues"):
-                    for idx, c in enumerate(res["cues"]):
-                        c["layout_mode"] = "fullscreen"
-                    return res["cues"], post_metadata, credit_usage, semantic_highlights
-        except Exception as e:
-            print(f"[storyboard_planner] Vertex AI metadata note: {e}")
-
-    if is_money_happiness:
-        print(f"[storyboard_planner] ✓ Planning Step 2 Beat Map (50/50 Split-Screen Light Visuals Above + Speaker Below, Longer Durations, English Studies) ({lang})!")
-        cues = build_money_happiness_storyboard(all_words, total_duration, lang=lang)
-        if not post_metadata:
-            if lang in ["ary", "darija", "moroccan"]:
-                post_metadata = {
-                    "post_title": "واش بصح الفلوس كتشري السعادة؟ (Kahneman & Killingsworth PNAS 2023)",
-                    "caption": "شحال هادي كنا كنسمعو بلي الفلوس مكتبقاش تشري السعادة فوق $75,000.\n\nفـ 2023، العالم الحائز على نوبل Daniel Kahneman والباحث Matthew Killingsworth نشرو دراسة حاسمة فمجلة PNAS:\n1️⃣ السعادة كتزيد بطريقة لوغاريتمية ($50k → $100k → $200k → $400k → $800k).\n2️⃣ العلاقة الإحصائية بين الدخل والسعادة اليومية يلاه r = 0.09.\n3️⃣ حسب Harvard Study of Adult Development (85-Year Study) وأبحاث Elizabeth Dunn، الفلوس كتشري السعادة غير إلا حولتيها لـ: الأمان والحرية (Autonomy & Time)، التجارب (Shared Experiences)، والعطاء (Generosity).\n\n📚 Academic Studies Referenced:\n• Killingsworth, Kahneman & Mellers (2023) — 'Income and emotional well-being: A conflict resolved', PNAS Vol. 120 No. 10\n• Whillans & Dunn (2017) — 'Buying time promotes happiness', PNAS\n• Dunn, Aknin & Norton (2008) — 'Spending Money on Others Promotes Happiness', Science\n• Waldinger & Schulz (2023) — Harvard Study of Adult Development ('The Good Life')\n• World Happiness Report — Oxford Wellbeing Research Centre & Gallup",
-                    "save_cta": "خبي هاد الفيديو عندك باش تفكر علاش كتجمع الفلوس.",
-                    "pinned_comment": "شنو هي الحاجة لي فنظرك كتعطي أكبر قيمة للفلوس: الوقت الحر (Autonomy)، التجارب (Experiences)، ولا العطاء (Generosity)؟",
-                    "hashtags": ["#المغرب", "#الدارجة", "#الفلوس", "#السعادة", "#استثمار", "#حرية_مالية", "#علم_النفس", "#اقتصاد", "#تطوير_الذات", "#مراكش"]
-                }
-            else:
-                post_metadata = {
-                    "post_title": "The $75,000 Happiness Myth vs. The Logarithmic Wealth Law (PNAS 2023)",
-                    "caption": "For years, we were told money stops buying happiness at $75,000. In 2023, Nobel laureate Daniel Kahneman and Matthew Killingsworth teamed up in PNAS to settle the conflict.\n\nHere is what the data actually shows:\n1️⃣ Happiness rises with LOGARITHMIC income ($50k → $100k → $200k → $400k → $800k require full doublings for the same small boost).\n2️⃣ The statistical correlation between log-income and daily happiness is just r = 0.09 — and for the unhappiest 20%, more money adds zero emotional well-being past $100k.\n3️⃣ Harvard's 85-Year Study & Elizabeth Dunn's research prove money only buys happiness when converted into Autonomy (buying back time), Shared Experiences, and Generosity.\n\n📚 Academic Citations:\n• Killingsworth, Kahneman & Mellers (2023) — 'Income and emotional well-being: A conflict resolved', PNAS Vol. 120, No. 10.\n• Whillans, Dunn et al. (2017) — 'Buying time promotes happiness', PNAS.\n• Dunn, Aknin & Norton (2008) — 'Spending Money on Others Promotes Happiness', Science.\n• Waldinger & Schulz (2023) — 'The Good Life' (Harvard Study of Adult Development).\n• World Happiness Report — Oxford Wellbeing Research Centre.",
-                    "save_cta": "Save this reel as a reminder to build wealth for freedom, not for show.",
-                    "pinned_comment": "Which of the 3 pillars gives you the highest return on money right now: Autonomy (time), Shared Experiences, or Generosity?",
-                    "hashtags": ["#quantfinance", "#behavioraleconomics", "#danielkahneman", "#wealthmindset", "#financialfreedom", "#psychologyofmoney", "#harvardstudy", "#scienceexplained", "#investing", "#hedonictreadmill"]
-                }
+    if is_unemployment:
+        print(f"[storyboard_planner] Planning Step 2 Beat Map for The Hidden Unemployment Crisis ({lang})!")
+        cues = build_unemployment_storyboard(all_words, total_duration, lang=lang)
+        if lang in ["ary", "darija", "moroccan"]:
+            post_metadata = {
+                "post_title": "الحقيقة الصادمة وراء أرقام البطالة: علاش ولات الرجعة للخدمة كتاخد نص عام؟",
+                "caption": "فاش كتسمع بلي أرقام الشغل طالعة والبطالة هابطة، كيجيك الإحساس بلي الاقتصاد بخير، ولكن الواقع مختلف تماماً.\n\nالشركات ما بقاتش كتدير طرد جماعي، بل دخلات فـ مرحلة كيسميوها الاقتصاديين تجميد التوظيف (Low-Hire Freeze). قليل لي كيطردوه، ولكن البيبان مسدودة فـ وجه أي واحد كيقلب على فرصة جديدة.\n\nأرقام مكتب إحصائيات الشغل (BLS) حتى لأكتوبر 2026:\n[1] جوج د المليون ديال الناس جالسين بلا خدمة لأكثر من 6 أشهر.\n[2] نسبة العاطلين لأكثر من 27 سيمانة طلعات من 22.8% لـ 27.6% فـ عامين فقط.\n[3] المعدل المتوسط ديال الانتظار باش تلقى خدمة فات 26 سيمانة (أكثر من نص عام).\n\nفـ الاقتصاد، الخطر الكبير كيتسمى تآكل المهارات (Hysteresis): كلما طالت مدة العطالة، كلما ضعفات القيمة التفاوضية ديالك.\n\nالمصادر العلمية:\n• U.S. Bureau of Labor Statistics (BLS): Current Population Survey (Series LNS13008275 & LNS13008276)\n• Blanchard & Summers (1986): \"Hysteresis and the European Unemployment Problem\", NBER Macroeconomics Annual",
+                "save_cta": "خبي هاد الفيديو باش تفكر ديما تبني احتياط مالي ديال 6 لـ 12 لشهر.",
+                "pinned_comment": "واش كتحس بلي سوق الشغل دابا داخل فـ مرحلة تجميد (Low-Hire Freeze)؟ شاركنا تجربتك فـ الكومنت.",
+                "hashtags": ["#المغرب", "#الدارجة", "#اقتصاد", "#شغل", "#بطالة", "#استثمار", "#حرية_مالية", "#تطوير_الذات", "#ذكاء_اصطناعي", "#مراكش"]
+            }
+        else:
+            post_metadata = {
+                "post_title": "The Hidden Unemployment Crisis: Why Getting Hired Now Takes Over 6 Months (BLS 2026)",
+                "caption": "Headlines celebrate strong job numbers and a low 4.1% unemployment rate, but beneath the surface, companies have entered a low-hire, low-fire freeze.\n\nHere is what the latest U.S. Bureau of Labor Statistics data reveals:\n[1] Nearly 2,000,000 Americans have now been jobless for six months or longer.\n[2] Over just two years (Oct 2024 to Oct 2026), long-term unemployment jumped from 22.8% to 27.6%.\n[3] The average stretch of unemployment has climbed from 22 weeks to over 26 weeks — meaning the average job search now takes over half a year.\n\nEconomists call the ultimate trap Hysteresis: the longer workers sit on the sidelines, the faster skills and pricing power erode.\n\nAcademic & Data Sources:\n• U.S. Bureau of Labor Statistics: CPS Series LNS13008275 & LNS13008276.\n• Blanchard & Summers (1986): \"Hysteresis and the European Unemployment Problem\", NBER Macroeconomics Annual.",
+                "save_cta": "Save this reel as a guide to building a 6-12 month cash runway in a frozen job market.",
+                "pinned_comment": "Are you seeing the low-hire freeze in your industry? Share what you are noticing below.",
+                "hashtags": ["#macroeconomics", "#economy", "#unemployment", "#jobmarket", "#hiringfreeze", "#finance", "#investing", "#wealthmindset", "#careertips", "#blsdata"]
+            }
         return cues, post_metadata, credit_usage, semantic_highlights
 
-    # Generic fallback for other scripts
+    if is_false_needs:
+        print(f"[storyboard_planner] Planning Step 2 Beat Map for Herbert Marcuse & False Needs ({lang})!")
+        cues = build_false_needs_storyboard(all_words, total_duration, lang=lang)
+        if lang in ["ary", "darija", "moroccan"]:
+            post_metadata = {
+                "post_title": "علاش كتبقى ديما مزير وعياّن واخا الصالير كيزيد؟ (هربرت ماركوز ودولاب التعود المادي)",
+                "caption": "فـ 1964، الفيلسوف هربرت ماركوز كتب فـ كتابو الشهير \"الإنسان ذو البعد الواحد\" بلي المجتمع ما بقاش كيحتاج للقوة باش يتحكم فينا، بل كيحكمنا عن طريق الاحتياجات المزيفة (False Needs).\n\nرغبات مصنوعة ديال الاستهلاك لي كتخلينا نخدمو بلا توقف باش نشريو حوايج كيبنجونا مؤقتاً.\n\nشنو تبت العلم من بعد؟\n[1] فيليب بريكمان (1978): أتبت وجود دولاب التعود المادي (Hedonic Treadmill) — أي ترقية أو ربح مالي كيتلاشى النشوة ديالو دغيا وترجع لنفس نقطة البداية.\n[2] تيم كاسر وريتشارد ريان (1993): الدراسة التاريخية \"الجانب المظلم للحلم الأمريكي\" أتبتات أن التركيز على المظاهر والفلوس كيرفع القلق، التوتر، والاكتئاب مباشرة.\n[3] مونيكا باور (2012): غير تشوف إعلانات أو يتسمى الإنسان \"مستهلك\" عوض \"فرد\"، كيطلع عندو الستريس وعدم الأمان فـ البلاصة.\n\nالدراسات المرجعية:\n• Marcuse (1964) — One-Dimensional Man (Beacon Press)\n• Brickman, Coates & Janoff-Bulman (1978) — Journal of Personality & Social Psychology\n• Kasser & Ryan (1993) — Journal of Personality & Social Psychology\n• Bauer et al. (2012) — Psychological Science",
+                "save_cta": "بارطاجي هاد الفيديو مع شي حد عزيز عليك كيخدم بلا قياس باش يوقف ويسول راسو هاد السؤال.",
+                "pinned_comment": "واش فايت حسيتي بدولاب التعود المادي: كتشري حاجة جديدة ودغيا كتلفها وترجع لنفس الإحساس؟",
+                "hashtags": ["#المغرب", "#الدارجة", "#علم_النفس", "#فلسفة", "#هربرت_ماركوز", "#استثمار", "#حرية_مالية", "#تطوير_الذات", "#راحة_البال", "#سعادة"]
+            }
+        else:
+            post_metadata = {
+                "post_title": "Why Making More Money Still Feels Broke: Herbert Marcuse & The Hedonic Treadmill",
+                "caption": "In 1964, philosopher Herbert Marcuse predicted why modern life feels exhausting no matter how much income grows. Decades later, psychology proved he was right.\n\nIn One-Dimensional Man, Marcuse introduced \"false needs\": manufactured desires for luxury and endless upgrades that keep us trapped working exhausting jobs to buy things we do not need.\n\nWhat Psychological Research Discovered:\n[1] Philip Brickman (1978): Proved the Hedonic Treadmill — material upgrades give a temporary dopamine rush before quickly resetting to baseline, keeping you constantly chasing the next hit.\n[2] Tim Kasser & Richard Ryan (1993): Published \"A Dark Side of the American Dream\", showing that prioritizing financial status directly correlates with higher anxiety, lower vitality, and depression.\n[3] Monika Bauer (2012): Found that merely viewing luxury cues or being labeled a \"consumer\" instead of an \"individual\" immediately triggers stress and competitiveness.\n\nLandmark Research Citations:\n• Marcuse (1964) — One-Dimensional Man (Beacon Press)\n• Brickman et al. (1978) — Journal of Personality and Social Psychology\n• Kasser & Ryan (1993) — Journal of Personality and Social Psychology\n• Bauer et al. (2012) — Psychological Science",
+                "save_cta": "Save this reel as a reminder before chasing your next lifestyle upgrade.",
+                "pinned_comment": "What is one purchase you thought would change your life, but you adapted to within two weeks?",
+                "hashtags": ["#psychology", "#philosophy", "#herbertmarcuse", "#hedonictreadmill", "#consumerism", "#mentalhealth", "#wealthmindset", "#financialfreedom", "#mindset", "#productivity"]
+            }
+        return cues, post_metadata, credit_usage, semantic_highlights
+
+    if is_money_happiness:
+        print(f"[storyboard_planner] Planning Step 2 Beat Map (Money vs Happiness) ({lang})!")
+        cues = build_money_happiness_storyboard(all_words, total_duration, lang=lang)
+        return cues, post_metadata, credit_usage, semantic_highlights
+
+    # Generic fallback
     cues = []
     cur_t = 3.5
     templates = ["study_citation", "log_income_curve", "correlation_split", "country_comparison", "three_pillars"]
