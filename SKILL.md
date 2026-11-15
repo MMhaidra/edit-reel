@@ -157,6 +157,36 @@ The pipeline employs an authentic, tactile physical-object visual language:
   ~/.gemini/config/skills/edit-reel/scripts/preview_reel_stills.py /tmp/reel_previews
 ```
 
+### Download Reference Media & B-Roll (yt-dlp):
+```bash
+# Download reference video / viral clip
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/download_ref.py "https://youtube.com/watch?v=..." -n ref_broll
+
+# Download and trim specific scene
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/download_ref.py "https://youtube.com/watch?v=..." -s 00:01:10 -e 00:01:25 -n broll_clip
+
+# Download audio only (WAV)
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/download_ref.py "https://..." --audio-only -n reference_audio
+```
+
+### Secondary Motion Graphics Option (HyperFrames):
+```bash
+# 1. Scaffold a new 9:16 vertical HTML/CSS motion graphics card:
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py init stat_card -d 6
+
+# 2. Render as standalone MP4 explainer:
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py render ~/Desktop/projects/reels_IG/motion_hyperframes/stat_card
+
+# 3. Render as transparent WebM alpha overlay (for video layering):
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py render ~/Desktop/projects/reels_IG/motion_hyperframes/stat_card --transparent
+```
+
 ---
 
 ## Packaging & Sharing this Skill

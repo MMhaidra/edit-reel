@@ -6,3 +6,4 @@ faster-whisper>=1.0.0
 python-docx>=1.1.0
 tqdm>=4.66.0
 google-genai>=0.1.0
+yt-dlp>=2025.0.0
