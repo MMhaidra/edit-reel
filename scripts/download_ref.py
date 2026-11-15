@@ -44,11 +44,13 @@ def download_media(url, output_dir=None, filename=None, start_time=None, end_tim
             "--audio-quality", "0"
         ])
     else:
-        # Best SDR 1080p video with audio merged to mp4
+        # Best SDR 1080p video with audio merged to mp4 (or fallback to any best format)
         cmd.extend([
-            "-f", "bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            "-f", "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
             "--merge-output-format", "mp4"
         ])
+
+    cmd.append(url)
 
     try:
         subprocess.run(cmd, check=True)
