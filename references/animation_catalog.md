@@ -43,4 +43,17 @@
 ### B. Candlestick Breakout Chart (`candlestick_chart`)
 - **Visual**: Financial green/red candles breaking through resistance line with an ascending breakout arrow.
 - **Color Accent**: Bullish Green (`#00E676`) / Bearish Red (`#FF5252`).
+
+---
+
+## 4. Editorial Paper Storytelling Tricks (`paper_objects.py` + `render_reel.py`)
+
+All templates below work generically from `beat_map.json` fields on any future video and pair with either `--speaker-style popout` (3D Pop-Out Speaker Card) or `--speaker-style cutout`:
+
+1. **Hook Typographic Stamp (`semantic_highlights.hook_stamp`)**: Floating uppercase header + accent pill badge above speaker head during State 1 opening hook.
+2. **Layered Mechanism Stack (`layered_stack`)**: Full-width tactile warm sand plates sliding in with staggered timing, coral strikethrough (`strike_idx`), active coral highlight (`active_idx`), and optional right callout (`right_badge`).
+3. **Archival Highlighted Book/Document Excerpt (`quote_excerpt`)**: Off-white Georgia Serif page (`doc_title`, `quote_lines`, `quote_footer`) with blush-coral `#E8C6BC` highlighter sweeps triggered on spoken `highlights` timestamps.
+4. **Horizontal Benchmark Bar Chart (`benchmark_bars`)**: Crisp charcoal `#141412` and coral `#CC5A43` bars compared against a dashed vertical benchmark rule (`bars`, `bench_label`, `bench_ratio`, `title_text`).
+5. **Before/After Label-Switch Slider (`label_slider`)**: Thin horizontal rule (`slider_labels: [left, right]`) gliding a pill thumb to the coral active state (`slide_t`), followed by empirical surge bars (`bars_t`).
+6. **Full-Canvas 2-Column Analytical Contrast (`two_col_compare`, `layout_mode: "fullscreen"`)**: Speaker steps off canvas for deep contrast: dark charcoal card with sequential terracotta symptom pills (`left_cfg`) paired with a proportional stacked sand/blush column (`right_cfg`).
 - **Trigger Keywords**: "stocks", "crypto", "bitcoin", "bull market", "bear market", "breakout".

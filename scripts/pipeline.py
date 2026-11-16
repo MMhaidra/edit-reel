@@ -169,14 +169,14 @@ def get_synced_sfx_schedule_for_cue(cue):
             (round(dur * 0.333, 2), "paper_turn.wav", 0.044),
             (round(dur * 0.667, 2), "clean_pop.wav", 0.040),
         ]
-    if template in ["marcuse_false_needs"]:
+    if template in ["marcuse_false_needs", "layered_stack"]:
         tr = cue.get("triggers") or {}
         return [
             (0.00, "subtle_whoosh.wav", 0.036),
             (round(float(tr.get("strike_at", 4.8)), 2), "tech_tick.wav", 0.038),
             (round(float(tr.get("highlight_at", 9.0)), 2), "paper_turn.wav", 0.044),
         ]
-    if template in ["marcuse_quote_excerpt"]:
+    if template in ["marcuse_quote_excerpt", "quote_excerpt"]:
         hl = cue.get("highlights") or []
         st = float(cue.get("start_time", 0.0))
         events = [(0.00, "paper_turn.wav", 0.042)]
@@ -190,13 +190,13 @@ def get_synced_sfx_schedule_for_cue(cue):
             (6.20, "clean_pop.wav", 0.040),
             (9.80, "tech_tick.wav", 0.040),
         ]
-    if template in ["kasser_ryan_dark_side", "kasser_dark_side_compare"]:
+    if template in ["kasser_ryan_dark_side", "kasser_dark_side_compare", "benchmark_bars", "two_col_compare"]:
         return [
             (0.00, "subtle_whoosh.wav", 0.036),
             (0.55, "paper_turn.wav", 0.042),
             (3.20, "tech_tick.wav", 0.038),
         ]
-    if template in ["bauer_cuing_consumerism"]:
+    if template in ["bauer_cuing_consumerism", "label_slider"]:
         tr = cue.get("triggers") or {}
         st = float(cue.get("start_time", 0.0))
         slide_off = max(1.0, round(float(tr.get("slide_t", st + 5.5)) - st, 2))
@@ -467,6 +467,8 @@ def derive_friendly_filename(video_path, sb_data, lang, design="paper"):
 
     if design == "glass":
         return f"{Path(base_name).stem}_GLASS_DESIGN.mp4"
+    if design == "classic-paper":
+        return f"{Path(base_name).stem}_CLASSIC_PAPER.mp4"
     return base_name
 
 
@@ -518,7 +520,19 @@ def write_reel_summary_txt(output_dir, video_filename, sb_data, lang, design="pa
             mf.write("\n" + block)
 
 
-def process_video(video_path, output_dir, lang="en", script=None, script_text=None, bgm_vol=0.045, use_cache=True, design="paper"):
+def process_video(
+    video_path,
+    output_dir,
+    lang="en",
+    script=None,
+    script_text=None,
+    bgm_vol=0.045,
+    use_cache=True,
+    design="paper",
+    speaker_style="auto",
+    show_hook_stamp=True,
+    subtitle_style="editorial",
+):
     video_path = Path(video_path).resolve()
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -589,15 +603,29 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
             "-l", lang
         ], "Step 2b: Beat Mapping & English Study Citations")
 
-    # Step 3: Render Master Reel (Default primary: "Paper & Objects"; Optional: "Obsidian Glass & HyperFrames")
+    # Step 3: Render Master Reel (Default: "paper"; Optional: "classic-paper" or "glass")
     if design == "glass":
         print_progress_bar(4, 7, f"Step 3: Rendering Obsidian Glass & HyperFrames Master Reel ({lang})...")
         from scripts.render_glass_reel import render_glass_reel_video
         render_glass_reel_video(cleaned_video, transcript_json, storyboard_json, final_output, lang=lang, bgm_vol=bgm_vol)
     else:
-        print_progress_bar(4, 7, f"Step 3: Rendering Paper & Objects Master Reel ({lang})...")
+        resolved_speaker = ("cutout" if speaker_style == "auto" else speaker_style) if design == "classic-paper" else ("popout" if speaker_style == "auto" else speaker_style)
+        paper_tone = "warm" if design == "classic-paper" else "editorial"
+        resolved_stamp = False if design == "classic-paper" else show_hook_stamp
+        print_progress_bar(4, 7, f"Step 3: Rendering Paper & Objects Master Reel ({design}, {resolved_speaker}, {lang})...")
         from scripts.render_reel import render_reel_video
-        render_reel_video(cleaned_video, transcript_json, storyboard_json, final_output, lang=lang, bgm_vol=bgm_vol)
+        render_reel_video(
+            cleaned_video,
+            transcript_json,
+            storyboard_json,
+            final_output,
+            lang=lang,
+            bgm_vol=bgm_vol,
+            speaker_style=resolved_speaker,
+            show_hook_stamp=resolved_stamp,
+            subtitle_style=subtitle_style,
+            paper_tone=paper_tone,
+        )
 
     # Step 4: Automated 6-Point Self-Review Quality Gate (10fps + Timeline Inspection)
     print_progress_bar(7, 7, "Step 4: Running Automated 6-Point Self-Review Quality Gate...")
@@ -665,7 +693,10 @@ def main():
     parser.add_argument("--input-folder", "-f", default=str(DEFAULT_REELS_DIR), help="Folder with raw videos")
     parser.add_argument("--output-dir", "-o", default=str(DEFAULT_REELS_DIR / "edited_output"), help="Output directory")
     parser.add_argument("--lang", "-l", default="en", choices=["en", "darija", "ary"], help="Language: en or darija")
-    parser.add_argument("--design", default="paper", choices=["paper", "glass"], help="Visual design style (default: paper)")
+    parser.add_argument("--design", default="paper", choices=["paper", "classic-paper", "glass"], help="Visual design style (default: paper)")
+    parser.add_argument("--speaker-style", default="auto", choices=["auto", "popout", "cutout"], help="Speaker split-screen framing: 3D popout card or full torso cutout")
+    parser.add_argument("--subtitle-style", default="editorial", choices=["editorial", "bold-stroke"], help="Subtitle aesthetic: clean editorial shadow or bold thick stroke")
+    parser.add_argument("--no-hook-stamp", action="store_true", help="Disable State 1 opening hook stamp above head")
     parser.add_argument("--script", "-s", default=None, help="Optional path to reference script file (.txt, .md, .docx)")
     parser.add_argument("--script-text", default=None, help="Optional inline reference script text")
     parser.add_argument("--bgm-vol", type=float, default=0.045, help="Background music volume (default: 0.045)")
@@ -673,9 +704,22 @@ def main():
     args = parser.parse_args()
 
     use_cache = not args.no_cache
+    show_hook_stamp = not args.no_hook_stamp
 
     if args.input:
-        process_video(args.input, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache, design=args.design)
+        process_video(
+            args.input,
+            args.output_dir,
+            args.lang,
+            script=args.script,
+            script_text=args.script_text,
+            bgm_vol=args.bgm_vol,
+            use_cache=use_cache,
+            design=args.design,
+            speaker_style=args.speaker_style,
+            show_hook_stamp=show_hook_stamp,
+            subtitle_style=args.subtitle_style,
+        )
     else:
         folder = Path(args.input_folder)
         if not folder.exists():
@@ -693,10 +737,22 @@ def main():
         print(f"[pipeline] Found {len(videos)} video file(s) in {folder}")
         for v in videos:
             low_name = v.name.lower()
-            if "_prod_reel" in low_name or "_cleaned" in low_name or "example" in low_name or "_glass_design" in low_name or low_name.startswith("reel_"):
+            if "_prod_reel" in low_name or "_cleaned" in low_name or "example" in low_name or "_glass_design" in low_name or "_classic_paper" in low_name or low_name.startswith("reel_"):
                 continue
             print(f"\n>>> Processing: {v.name}")
-            process_video(v, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache, design=args.design)
+            process_video(
+                v,
+                args.output_dir,
+                args.lang,
+                script=args.script,
+                script_text=args.script_text,
+                bgm_vol=args.bgm_vol,
+                use_cache=use_cache,
+                design=args.design,
+                speaker_style=args.speaker_style,
+                show_hook_stamp=show_hook_stamp,
+                subtitle_style=args.subtitle_style,
+            )
 
 
 if __name__ == "__main__":

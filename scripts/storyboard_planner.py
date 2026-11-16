@@ -765,33 +765,82 @@ def plan_storyboard(transcript_data, lang="en", use_ai=True):
         cues = build_money_happiness_storyboard(all_words, total_duration, lang=lang)
         return cues, post_metadata, credit_usage, semantic_highlights
 
-    # Generic fallback
+    # Generic fallback for any new raw video topic: rotates editorial storytelling tricks
     cues = []
-    cur_t = 3.5
-    templates = ["study_citation", "log_income_curve", "correlation_split", "country_comparison", "three_pillars"]
+    cur_t = 6.5 if total_duration >= 20.0 else 3.2
+    editorial_templates = ["layered_stack", "benchmark_bars", "quote_excerpt", "label_slider", "two_col_compare"]
     idx = 0
-    while cur_t < total_duration - 6.0:
-        end_t = min(total_duration - 5.0, cur_t + 8.5)
-        tpl = templates[idx % len(templates)]
-        cues.append({
+    while cur_t < total_duration - 6.5:
+        end_t = min(total_duration - 5.0, cur_t + 10.5)
+        if end_t - cur_t < 5.2:
+            break
+        tpl = editorial_templates[idx % len(editorial_templates)]
+        seg_words = [w["word"] for w in all_words if cur_t <= float(w.get("start", 0.0)) <= end_t]
+        snippet = " ".join(seg_words[:8]) if seg_words else f"Concept {idx + 1}"
+        is_full = tpl == "two_col_compare"
+        cue = {
             "beat_id": idx + 1,
-            "idea": f"Core Concept Beat {idx + 1}",
+            "idea": f"Editorial Concept {idx + 1}: {snippet[:60]}",
             "domain": tpl,
             "template": tpl,
             "animation_type": tpl,
-            "layout_mode": "split",
-            "split_height": 920,
-            "kicker": "QUANTITATIVE RESEARCH STUDY",
-            "headline": "Empirical evidence and mathematical proof.",
-            "title": "EMPIRICAL PROOF",
-            "badge": "RESEARCH DATA",
+            "layout_mode": "fullscreen" if is_full else "split",
+            "split_height": 0 if is_full else 920,
+            "kicker": "EMPIRICAL ANALYSIS  •  KEY INSIGHT",
+            "headline": snippet,
+            "title": f"KEY INSIGHT {idx + 1}",
+            "badge": "INSIGHT",
             "start_time": round(cur_t, 2),
             "end_time": round(end_t, 2),
             "duration": round(end_t - cur_t, 2),
-            "custom_render": True
-        })
+            "custom_render": True,
+        }
+        if tpl == "layered_stack":
+            cue["plates"] = ["Surface Myth", "Core Mechanism", "Hidden Driver", "Real Impact"]
+            cue["active_idx"] = 1
+            cue["strike_idx"] = 0
+        elif tpl == "quote_excerpt":
+            cue["doc_title"] = "RESEARCH SUMMARY  •  KEY PRINCIPLE"
+            cue["quote_lines"] = ['"Empirical evidence reveals', 'the core mechanism behind', f'concept {idx + 1}."']
+            cue["highlights"] = [["Empirical evidence", round(cur_t + 2.0, 2)], ["core mechanism", round(cur_t + 5.0, 2)]]
+        elif tpl == "benchmark_bars":
+            cue["title_text"] = "Comparative Impact"
+            cue["bench_label"] = "Baseline"
+            cue["bench_ratio"] = 0.25
+            cue["bars"] = [
+                {"label": "Baseline Case", "ratio": 0.35, "val_str": "BASE", "muted": True, "accent": False},
+                {"label": "Key Driver", "ratio": 0.78, "val_str": "+HIGH", "muted": False, "accent": True},
+                {"label": "Outcome Shift", "ratio": 0.85, "val_str": "+SPIKE", "muted": False, "accent": False},
+            ]
+        elif tpl == "label_slider":
+            cue["slider_labels"] = ["BEFORE", "AFTER"]
+            cue["triggers"] = {"slide_t": round(cur_t + 3.5, 2), "bars_t": round(cur_t + 5.5, 2)}
+        elif tpl == "two_col_compare":
+            cue["left_cfg"] = {
+                "header": "Old Model",
+                "big_title": "MYTH",
+                "subtitle": "Conventional View",
+                "items": [{"text": "LIMITATION 1", "at": 1.2}, {"text": "LIMITATION 2", "at": 2.8}],
+            }
+            cue["right_cfg"] = {
+                "header": "Empirical Reality",
+                "top_label": "Evidence",
+                "mid_label": "Verified Shift",
+                "bot_big": "PROVEN",
+                "bot_sub": "Key Takeaway",
+            }
+        cues.append(cue)
         idx += 1
-        cur_t = end_t + 2.0
+        cur_t = end_t + 1.5
+
+    if all_words and cues and cues[0]["start_time"] >= 4.5:
+        first_chunk = " ".join(w["word"] for w in all_words[:4])
+        semantic_highlights["hook_stamp"] = {
+            "badge": "KEY BREAKDOWN  •  INSIGHTS",
+            "title": first_chunk.upper()[:28] if first_chunk.isascii() else "KEY INSIGHT",
+            "start_time": 1.0,
+            "end_time": round(min(cues[0]["start_time"] - 0.8, 6.2), 2),
+        }
 
     return cues, post_metadata, credit_usage, semantic_highlights
 

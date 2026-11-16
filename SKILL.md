@@ -166,9 +166,27 @@ Unless `--design glass` is explicitly requested, every pipeline run defaults to 
   ~/.gemini/config/skills/edit-reel/scripts/download_ref.py "https://..." --audio-only -n reference_audio
 ```
 
-### Secondary Design & Motion Graphics Option (Obsidian Glass & HyperFrames):
+### Secondary Design & Framing Options (`--design`, `--speaker-style`, `--subtitle-style`, `--no-hook-stamp`):
 ```bash
-# 0. Run full pipeline using optional Obsidian Glass & HyperFrames aesthetic (--design paper remains default):
+# Default (Editorial Paper + 3D Pop-Out Speaker Card + All Editorial Tricks):
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/pipeline.py \
+  -i ~/Desktop/projects/reels_IG/raw_video.MP4 \
+  --lang darija
+
+# Classic Paper Mode (Original warm #E2DDD1 kraft + full torso cutout + bold-stroke captions):
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/pipeline.py \
+  -i ~/Desktop/projects/reels_IG/raw_video.MP4 \
+  --design classic-paper --subtitle-style bold-stroke
+
+# Editorial Paper with Classic Cutout Torso (mix & match framing styles):
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/pipeline.py \
+  -i ~/Desktop/projects/reels_IG/raw_video.MP4 \
+  --design paper --speaker-style cutout --no-hook-stamp
+
+# Obsidian Glass & HyperFrames Mode (Secondary dark tech studio aesthetic):
 ~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
   ~/.gemini/config/skills/edit-reel/scripts/pipeline.py \
   --input-folder ~/Desktop/projects/reels_IG \
@@ -176,18 +194,23 @@ Unless `--design glass` is explicitly requested, every pipeline run defaults to 
   --lang darija \
   --design glass
 
-# 1. Scaffold a new 9:16 vertical HTML/CSS motion graphics card:
+# HyperFrames Standalone Card Scaffolding & Rendering:
 ~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
   ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py init stat_card -d 6
-
-# 2. Render as standalone MP4 explainer:
 ~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
   ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py render ~/Desktop/projects/reels_IG/motion_hyperframes/stat_card
-
-# 3. Render as transparent WebM alpha overlay (for video layering):
 ~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
   ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py render ~/Desktop/projects/reels_IG/motion_hyperframes/stat_card --transparent
 ```
+
+#### Available Options Summary
+- `--design {paper, classic-paper, glass}`:
+  - `paper` *(default)*: Warm alabaster `#F3F0E8`, terracotta `#CC5A43` focal accents, `popout` rounded speaker card, micro-provenance eyebrow header, and generic data-driven storytelling templates (`layered_stack`, `quote_excerpt`, `benchmark_bars`, `label_slider`, `two_col_compare`).
+  - `classic-paper`: Restores original `#E2DDD1` warm kraft paper, full-body MediaPipe cutout (`cutout`), and torn notebook citations without rounded card frame.
+  - `glass`: Dark obsidian studio gradient with frosted HyperFrames glassmorphic cards.
+- `--speaker-style {auto, popout, cutout}`: Switch between **3D Pop-Out Floating Card** (`popout`, protects hand gestures) and **Full Body Cutout** (`cutout`).
+- `--subtitle-style {editorial, bold-stroke}`: Switch between crisp soft-shadow editorial text and classic thick dark outline captions.
+- `--no-hook-stamp`: Disables the State 1 top-of-head opening typographic badge + title stamp.
 
 ---
 

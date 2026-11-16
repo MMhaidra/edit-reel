@@ -508,8 +508,8 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         paste_sprite(canvas, bank["chip_skill_erosion"], 300, 480, offset_y=(1.0 - p_c1) * 35, opacity=min(1.0, p_c1))
         paste_sprite(canvas, bank["chip_pricing_power"], 770, 480, offset_y=(1.0 - p_c2) * 35, opacity=min(1.0, p_c2))
 
-    elif btype == "marcuse_false_needs":
-        # Beat 1 (Marcuse): Provenance eyebrow + Layered Stack Plates + Right Callout Badge
+    elif btype in ("marcuse_false_needs", "layered_stack"):
+        # Editorial Layered Mechanism Stack Plates + Right Callout Badge (data-driven or Marcuse preset)
         kicker = cue.get("kicker") or "Herbert Marcuse (1964) • One-Dimensional Man • Beacon Press"
         V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
         tr = cue.get("triggers") or {}
@@ -517,27 +517,32 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         highlight_at = float(tr.get("highlight_at", 9.0))
         badge_at = float(tr.get("badge_at", 16.5))
 
-        plates = [
+        plates = cue.get("plates") or [
             "Coercion & Force",
             "False Needs",
             "Endless Work",
             "Temporary Numbing",
         ]
-        right_badge = {"value": "TRAPPED", "sub": "Manufactured Desires", "at": badge_at}
+        right_badge = cue.get("right_badge")
+        if right_badge is None and btype == "marcuse_false_needs":
+            right_badge = {"value": "TRAPPED", "sub": "Manufactured Desires", "at": badge_at}
+        elif isinstance(right_badge, dict) and "at" not in right_badge:
+            right_badge = {**right_badge, "at": badge_at}
+
         V.draw_layered_stack_plates(
             canvas,
             plates,
             el=el,
-            active_idx=1,
-            strike_idx=0,
+            active_idx=int(cue.get("active_idx", 1)),
+            strike_idx=cue.get("strike_idx", 0),
             strike_at=strike_at,
             highlight_at=highlight_at,
             right_badge=right_badge,
             fade_out=fade_out,
         )
 
-    elif btype == "marcuse_quote_excerpt":
-        # Beat 2 (Marcuse Quote): Archival Serif Book Sheet with acoustic blush highlighter sweeps
+    elif btype in ("marcuse_quote_excerpt", "quote_excerpt"):
+        # Archival Serif Document / Book Excerpt Sheet with acoustic blush highlighter sweeps
         kicker = cue.get("kicker") or "One-Dimensional Man (1964) • Ch. 1: New Forms of Control"
         V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
 
@@ -546,20 +551,25 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
             ["hi-fi set", st + 6.4],
             ["split-level home", st + 8.0],
         ]
-        lines = [
+        lines = cue.get("quote_lines") or [
             '"The people recognize themselves',
             'in their commodities; they find',
             'their soul in their automobile,',
             'hi-fi set, split-level home..."',
         ]
+        doc_title = cue.get("doc_title") or "ONE-DIMENSIONAL MAN  •  BEACON PRESS (1964)"
+        footer = cue.get("quote_footer")
+        if footer is None:
+            footer = "— Ch. 1: The New Forms of Control, p. 9" if btype == "marcuse_quote_excerpt" else f"— {cue.get('badge', 'Primary Source Excerpt')}"
         V.draw_highlighted_excerpt_sheet(
             canvas,
-            "ONE-DIMENSIONAL MAN  •  BEACON PRESS (1964)",
+            doc_title,
             lines,
             highlights=highlights,
             cur_t=cur_t,
             el=el,
             fade_out=fade_out,
+            footer=footer,
         )
 
     elif btype == "brickman_hedonic_treadmill":
@@ -615,11 +625,11 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         slide_raw = max(0.0, min(1.0, (el - 3.5) / max(4.0, dur - 4.5)))
         V.draw_slider_switch_track(canvas, "UPGRADE HIGH", "BACK TO BASELINE", ease_in_out_cubic(slide_raw), y=695, opacity=fade_out)
 
-    elif btype == "kasser_ryan_dark_side":
-        # Beat 4A (Kasser & Ryan 1993): Horizontal Empirical Comparison Bars
+    elif btype in ("kasser_ryan_dark_side", "benchmark_bars"):
+        # Horizontal Empirical Comparison Bars against dashed reference baseline
         kicker = cue.get("kicker") or "Tim Kasser & Richard Ryan (1993) • J. Personality & Social Psychology"
         V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
-        bars = [
+        bars = cue.get("bars") or [
             {"label": "Intrinsic Vitality", "ratio": 0.36, "val_str": "-34%", "muted": True, "accent": False},
             {"label": "Self-Actualization", "ratio": 0.42, "val_str": "-29%", "muted": True, "accent": False},
             {"label": "Anxiety Symptoms", "ratio": 0.80, "val_str": "+HIGH", "muted": False, "accent": False},
@@ -628,19 +638,19 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         V.draw_horizontal_benchmark_bars(
             canvas,
             bars,
-            bench_label="Baseline (0)",
-            bench_ratio=0.18,
+            bench_label=cue.get("bench_label") or "Baseline (0)",
+            bench_ratio=float(cue.get("bench_ratio", 0.18)),
             el=el,
-            title_text="Financial Aspiration vs Well-Being",
+            title_text=cue.get("title_text") or (cue.get("title") if btype == "benchmark_bars" else "Financial Aspiration vs Well-Being"),
             fade_out=fade_out,
         )
 
-    elif btype == "kasser_dark_side_compare":
-        # Beat 4B (State 3 Full-Canvas 2-Column Compare): Material Identity Trap vs Well-Being
+    elif btype in ("kasser_dark_side_compare", "two_col_compare"):
+        # State 3 Full-Canvas 2-Column Analytical Contrast
         kicker = cue.get("kicker") or "Kasser & Ryan (1993) • Correlates of Financial Aspiration"
         V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
         tr = cue.get("triggers") or {}
-        left_cfg = {
+        left_cfg = cue.get("left_cfg") or {
             "header": "Wealth-First Trap",
             "big_title": "BRAIN",
             "subtitle": "Tied to Status & Money",
@@ -650,7 +660,7 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
                 {"text": "DEPRESSION RISK", "at": float(tr.get("depr_at", 4.2))},
             ],
         }
-        right_cfg = {
+        right_cfg = cue.get("right_cfg") or {
             "header": "Intrinsic Well-Being",
             "top_label": "Material Status",
             "mid_label": "Even If Wealthy",
@@ -659,31 +669,31 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         }
         V.draw_full_compare_columns(canvas, left_cfg, right_cfg, el=el, fade_out=fade_out)
 
-    elif btype == "bauer_cuing_consumerism":
-        # Beat 5 (Bauer et al. 2012): Horizontal Label Switch Slider + Stress Impact Bars
+    elif btype in ("bauer_cuing_consumerism", "label_slider"):
+        # Horizontal Label-Switch Slider Track + Impact Surge Bars
         kicker = cue.get("kicker") or "Monika A. Bauer et al. (2012) • Psychological Science (Vol. 23)"
         V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
         tr = cue.get("triggers") or {}
-        slide_t = float(tr.get("slide_t", st + 5.5))
-        bars_t = float(tr.get("bars_t", st + 10.0))
+        slide_t = float(tr.get("slide_t", st + 3.5))
+        bars_t = float(tr.get("bars_t", st + 5.5))
+        s_left, s_right = (cue.get("slider_labels") or ["INDIVIDUAL", "CONSUMER"])[:2]
 
-        slide_prog = ease_in_out_cubic(min(1.0, max(0.0, (cur_t - max(st + 1.0, slide_t - 1.2)) / 1.4)))
-        V.draw_slider_switch_track(canvas, "INDIVIDUAL", "CONSUMER", slide_prog, y=268, opacity=fade_out)
+        slide_prog = ease_in_out_cubic(min(1.0, max(0.0, (cur_t - max(st + 0.8, slide_t - 1.2)) / 1.4)))
+        V.draw_slider_switch_track(canvas, s_left, s_right, slide_prog, y=268, opacity=fade_out)
 
-        if cur_t >= max(st + 2.5, bars_t - 1.5):
-            el_bars = max(0.0, cur_t - max(st + 2.5, bars_t - 1.5))
-            bars = [
+        if cur_t >= max(st + 1.8, bars_t - 1.5):
+            el_bars = max(0.0, cur_t - max(st + 1.8, bars_t - 1.5))
+            bars = cue.get("bars") or [
                 {"label": "Stress Response", "ratio": 0.84, "val_str": "SPIKE", "accent": True},
                 {"label": "Insecurity", "ratio": 0.72, "val_str": "HIGH", "accent": False},
                 {"label": "Envy & Comparison", "ratio": 0.78, "val_str": "HIGH", "accent": False},
             ]
-            # Offset cleanly below slider track with generous headroom above portrait
             sub_canvas = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
             V.draw_horizontal_benchmark_bars(
                 sub_canvas,
                 bars,
-                bench_label="Neutral Cue",
-                bench_ratio=0.20,
+                bench_label=cue.get("bench_label") or "Neutral Cue",
+                bench_ratio=float(cue.get("bench_ratio", 0.20)),
                 el=el_bars,
                 fade_out=fade_out,
             )
@@ -716,11 +726,17 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
                 paste_sprite(canvas, bank[key], cx, cur_top_y + bank[f"{key}_h"] / 2 - 10 / V.S, opacity=min(1.0, p_val * 2.5))
 
 
-def _draw_soft_shadow_text(canvas, xy, txt, font, fill_col, shadow_col, is_light_bg=False):
+def _draw_soft_shadow_text(canvas, xy, txt, font, fill_col, shadow_col, is_light_bg=False, bold_stroke=False):
     d = ImageDraw.Draw(canvas)
     x, y = xy
     if is_light_bg:
-        d.text((x, y), txt, font=font, fill=fill_col)
+        if bold_stroke:
+            d.text((x, y), txt, font=font, fill=fill_col, stroke_width=2, stroke_fill=(250, 248, 243, 255))
+        else:
+            d.text((x, y), txt, font=font, fill=fill_col)
+    elif bold_stroke:
+        d.text((x + 2, y + 4), txt, font=font, fill=shadow_col, stroke_width=5, stroke_fill=shadow_col)
+        d.text((x, y), txt, font=font, fill=fill_col, stroke_width=4, stroke_fill=(18, 16, 14, 255))
     else:
         d.text((x + 2, y + 4), txt, font=font, fill=shadow_col, stroke_width=2, stroke_fill=shadow_col)
         d.text((x, y), txt, font=font, fill=fill_col, stroke_width=1, stroke_fill=(14, 14, 14, 210))
@@ -790,7 +806,8 @@ def build_subtitle_chunks(transcript_data, total_duration, is_arabic=False, max_
     return chunks, font_sub
 
 
-def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=None):
+def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=None, subtitle_style="editorial"):
+    bold_stroke = (subtitle_style == "bold-stroke")
     active_chunk = None
     for c in chunks:
         if c["start"] <= cur_t <= c["end"] + 0.06:
@@ -847,20 +864,20 @@ def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=F
                 for orig_i, w_str, disp_str, w_w, w_h, u_font, _ in grp:
                     fill_c = active_fill if orig_i == active_word_idx else base_fill
                     y_pos = cy - (3 if orig_i == active_word_idx else 0) + 4
-                    _draw_soft_shadow_text(canvas, (lx, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
+                    _draw_soft_shadow_text(canvas, (lx, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode, bold_stroke=bold_stroke)
                     lx += w_w + spacing
             else:
                 orig_i, w_str, disp_str, w_w, w_h, u_font, _ = grp[0]
                 fill_c = active_fill if orig_i == active_word_idx else base_fill
                 y_pos = cy - (3 if orig_i == active_word_idx else 0)
-                _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
+                _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode, bold_stroke=bold_stroke)
             cur_x -= spacing
     else:
         cur_x = start_x
         for orig_i, w_str, disp_str, w_w, w_h, u_font, _ in word_boxes:
             fill_c = active_fill if orig_i == active_word_idx else base_fill
             y_pos = cy - (3 if orig_i == active_word_idx else 0)
-            _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
+            _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode, bold_stroke=bold_stroke)
             cur_x += w_w + spacing
 
 
@@ -878,8 +895,20 @@ def get_video_info(video_path):
     return fps, dur
 
 
-def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp4, lang="en", bgm_vol=0.045):
+def render_reel_video(
+    cleaned_video,
+    transcript_json,
+    storyboard_json,
+    output_mp4,
+    lang="en",
+    bgm_vol=0.045,
+    speaker_style="auto",
+    show_hook_stamp=True,
+    subtitle_style="editorial",
+    paper_tone="editorial",
+):
     is_arabic = lang in ["ary", "darija", "moroccan"]
+    resolved_speaker = "popout" if speaker_style == "auto" else speaker_style
     fps, total_dur = get_video_info(cleaned_video)
     fps_int = int(round(fps))
 
@@ -889,13 +918,14 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
         storyboard_data = json.load(f)
 
     cues = storyboard_data.get("storyboard", [])
-    hook_stamp = (storyboard_data.get("semantic_highlights") or {}).get("hook_stamp")
-    fullscreen_paper_types = {"log_income_curve", "country_comparison", "kasser_dark_side_compare"}
+    hook_stamp = (storyboard_data.get("semantic_highlights") or {}).get("hook_stamp") if show_hook_stamp else None
+    fullscreen_paper_types = {"log_income_curve", "country_comparison", "kasser_dark_side_compare", "two_col_compare"}
 
-    print(f"[render_reel] Pre-baking sprites & academic notebook cutoffs for {Path(cleaned_video).name}...")
+    print(f"[render_reel] Pre-baking sprites & editorial paper visuals (speaker={resolved_speaker}, tone={paper_tone}, subs={subtitle_style}) for {Path(cleaned_video).name}...")
     bank = build_sprite_bank(lang=lang)
-    paper_base = V.paper_background()
-    sub_chunks, font_sub = build_subtitle_chunks(transcript_data, total_dur, is_arabic=is_arabic)
+    paper_base = V.paper_background(tone=paper_tone)
+    sub_max_w = 610 if resolved_speaker == "popout" else 820
+    sub_chunks, font_sub = build_subtitle_chunks(transcript_data, total_dur, is_arabic=is_arabic, max_line_width=sub_max_w)
 
     seg_model = str(SKILL_ROOT / "models" / "selfie_segmenter.tflite")
     segmenter = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
@@ -991,16 +1021,16 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
                         fade_out=fade_h,
                     )
 
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=1545)
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=1545, subtitle_style=subtitle_style)
 
         elif is_full_paper:
             # State 3: Full-Screen Paper Infographics (2-Column Compare / Parallel Graphs)
             canvas = paper_base.copy()
             render_beat_graphics(canvas, active_cue, cur_t, bank)
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=True, cy_override=1565)
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=True, cy_override=1565, subtitle_style=subtitle_style)
 
         else:
-            # State 2: 3D Pop-Out Speaker Card on Editorial Paper + Graphics Stage Above
+            # State 2: Speaker on Paper (3D Pop-Out Card OR Full Cutout) + Editorial Stage Above
             canvas = paper_base.copy()
 
             mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_np)
@@ -1043,22 +1073,32 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
                 raw_im = Image.fromarray(frame_np, "RGB").convert("RGBA")
                 canvas = Image.blend(raw_im, canvas, lower_p)
 
-            V.composite_popout_speaker_card(
-                canvas,
-                frame_np,
-                m,
-                smoothed_head_top=smoothed_head_top,
-                smoothed_head_cx=smoothed_head_cx,
-                lower_p=lower_p,
-                card_rect=(190, 1155, 700, 575),
-                target_head_top_y=855,
-                card_scale=0.72,
-                radius=30,
-            )
+            if resolved_speaker == "cutout":
+                cut_rgba = fast_cutout_rgba(frame_np, m)
+                sc = 1.0 - 0.10 * lower_p
+                target_y = int((800 - int(smoothed_head_top * 0.90)) * lower_p)
+                im_spk = cut_rgba.resize((int(1080 * sc), int(1920 * sc)), Image.BILINEAR)
+                sx = (1080 - im_spk.width) // 2
+                canvas.alpha_composite(im_spk, (sx, target_y))
+                sub_y = 1555
+            else:
+                V.composite_popout_speaker_card(
+                    canvas,
+                    frame_np,
+                    m,
+                    smoothed_head_top=smoothed_head_top,
+                    smoothed_head_cx=smoothed_head_cx,
+                    lower_p=lower_p,
+                    card_rect=(190, 1155, 700, 575),
+                    target_head_top_y=855,
+                    card_scale=0.72,
+                    radius=30,
+                )
+                sub_y = int(round(1545 + (1505 - 1545) * lower_p))
+
             if active_cue is not None:
                 render_beat_graphics(canvas, active_cue, cur_t, bank)
-            sub_y = int(round(1545 + (1505 - 1545) * lower_p))
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=sub_y)
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=sub_y, subtitle_style=subtitle_style)
 
         out_proc.stdin.write(canvas.convert("RGB").tobytes())
         f_idx += 1
@@ -1163,10 +1203,25 @@ def main():
     parser.add_argument("--output", "-o", required=False, help="Output MP4 path")
     parser.add_argument("--lang", "-l", default="en", help="Language: en or darija")
     parser.add_argument("--bgm-vol", type=float, default=0.045, help="Background music volume")
+    parser.add_argument("--speaker-style", default="auto", choices=["auto", "popout", "cutout"], help="Speaker framing in Split-Screen: popout card vs full body cutout")
+    parser.add_argument("--no-hook-stamp", action="store_true", help="Disable opening State 1 typographic hook stamp")
+    parser.add_argument("--subtitle-style", default="editorial", choices=["editorial", "bold-stroke"], help="Subtitle border/shadow styling")
+    parser.add_argument("--paper-tone", default="editorial", choices=["editorial", "warm"], help="Paper canvas tone: #F3F0E8 editorial vs #E2DDD1 classic warm")
     args = parser.parse_args()
 
     if args.cleaned_video and args.output:
-        render_reel_video(args.cleaned_video, args.transcript, args.storyboard, args.output, lang=args.lang, bgm_vol=args.bgm_vol)
+        render_reel_video(
+            args.cleaned_video,
+            args.transcript,
+            args.storyboard,
+            args.output,
+            lang=args.lang,
+            bgm_vol=args.bgm_vol,
+            speaker_style=args.speaker_style,
+            show_hook_stamp=not args.no_hook_stamp,
+            subtitle_style=args.subtitle_style,
+            paper_tone=args.paper_tone,
+        )
     else:
         out_dir = Path.home() / "Desktop" / "projects" / "reels_IG" / "edited_output" / "v10_polished_edits"
         out_dir.mkdir(parents=True, exist_ok=True)

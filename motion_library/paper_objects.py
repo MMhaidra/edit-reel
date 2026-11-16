@@ -56,13 +56,14 @@ def sans_font(size, black=False):
 _paper_cache = {}
 
 
-def paper_background(w=W, h=H, seed=7):
-    key = (w, h, seed)
+def paper_background(w=W, h=H, seed=7, tone="editorial"):
+    """Generate warm grainy paper background; supports 'editorial' (#F3F0E8) and 'warm' (#E2DDD1)."""
+    key = (w, h, seed, tone)
     if key in _paper_cache:
         return _paper_cache[key].copy()
     rng = np.random.default_rng(seed)
     base = np.zeros((h, w, 3), np.float32)
-    base[:] = PAPER
+    base[:] = PAPER_WARM if tone == "warm" else PAPER
     # soft mottling
     blotch = rng.normal(0, 1, (h // 64 + 2, w // 64 + 2)).astype(np.float32)
     blotch = np.array(Image.fromarray(blotch).resize((w, h), Image.BICUBIC))
@@ -781,7 +782,7 @@ def draw_layered_stack_plates(canvas, plates, el, active_idx=None, strike_idx=No
     canvas.alpha_composite(overlay)
 
 
-def draw_highlighted_excerpt_sheet(canvas, doc_title, text_lines, highlights, cur_t, el, fade_out=1.0):
+def draw_highlighted_excerpt_sheet(canvas, doc_title, text_lines, highlights, cur_t, el, fade_out=1.0, footer="— Ch. 1: The New Forms of Control, p. 9"):
     """
     Renders a realistic off-white archival document / book excerpt sheet with
     Georgia Serif typography and smooth coral-blush highlighter ink washes
@@ -851,7 +852,8 @@ def draw_highlighted_excerpt_sheet(canvas, doc_title, text_lines, highlights, cu
             cur_x += int(round(d.textlength(seg_txt, font=f_body)))
         cur_y += line_step
 
-    d.text((x0 + 42, y1 - 54), "— Ch. 1: The New Forms of Control, p. 9", font=ed_serif(24, bold=False), fill=INK_SOFT + (int(225 * op),))
+    if footer:
+        d.text((x0 + 42, y1 - 54), footer, font=ed_serif(24, bold=False), fill=INK_SOFT + (int(225 * op),))
     canvas.alpha_composite(sheet)
 
 

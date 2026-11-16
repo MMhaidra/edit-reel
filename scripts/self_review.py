@@ -213,7 +213,7 @@ def main():
     parser.add_argument("--transcript", "-t", required=True, help="Aligned transcript JSON path")
     parser.add_argument("--storyboard", "-s", required=True, help="Storyboard / Beat Map JSON path")
     parser.add_argument("--workdir", "-w", default="./.reel_cache", help="Working directory")
-    parser.add_argument("--design", default="paper", choices=["paper", "glass"], help="Visual design style (default: paper)")
+    parser.add_argument("--design", default="paper", choices=["paper", "classic-paper", "glass"], help="Visual design style (default: paper)")
     args = parser.parse_args()
 
     run_six_point_self_review(args.video, args.transcript, args.storyboard, args.workdir, design=args.design)
