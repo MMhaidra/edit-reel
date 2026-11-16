@@ -352,7 +352,7 @@ def build_final_composite(cleaned_video, overlays_manifest_path, subtitles_mov_p
     print(f"[pipeline] Final production reel saved to:\n  {output_reel_path}")
 
 
-def verify_production_quality(video_path):
+def verify_production_quality(video_path, design="paper"):
     try:
         cmd_probe = [
             "ffprobe",
@@ -395,7 +395,12 @@ def verify_production_quality(video_path):
         print(f"  ✓ Frame Geometry:    {w}x{h} (9:16 Vertical Instagram Standard)")
         print(f"  ✓ Video Codec:       {vcodec.upper()} (Universal iOS/Android SDR yuv420p)")
         print(f"  ✓ Audio Loudness:    {i_lufs:.1f} LUFS / Mean: {mean_db:.1f} dB (Voice + Mild Ambient Bed + SFX)")
-        print(f"  ✓ Split-Screen Mode: Top 100% Opaque Light Visual (y=0..920) + Bottom Live Speaker (y=920..1920)")
+        split_desc = (
+            "Top 100% Opaque Obsidian Glass HyperFrames Visual (y=0..920) + Bottom Cutout Speaker"
+            if design == "glass"
+            else "Top 100% Opaque Light Visual (y=0..920) + Bottom Live Speaker (y=920..1920)"
+        )
+        print(f"  ✓ Split-Screen Mode: {split_desc}")
         print(f"  ✓ Study Citations:   100% English Study & Author Names (PNAS 2023, Harvard, Science)")
         print(f"  ✓ Tail Protection:   Final Spoken Words Intact + Stopped Before Arm Reaches Camera")
         print("—" * 72)
@@ -403,7 +408,80 @@ def verify_production_quality(video_path):
         print(f"[pipeline] Quality audit note: {e}")
 
 
-def process_video(video_path, output_dir, lang="en", script=None, script_text=None, bgm_vol=0.045, use_cache=True):
+REEL_FRIENDLY_NAMES = {
+    "E8AE11A3-4062-4691-AF49-DD69AC94FBF9": "Reel_1_The_Hidden_Unemployment_Crisis_EN.mp4",
+    "8D33DF6D-7C1A-4784-B8E4-3B7D0A5CFAC4": "Reel_2_The_Hidden_Unemployment_Crisis_Darija.mp4",
+    "DAA97F19-F02A-40FB-B7D2-8BF87A59FDD9": "Reel_3_Herbert_Marcuse_False_Needs_EN.mp4",
+    "F189A3EA-73AF-4BED-A71F-C14272E9D58E": "Reel_4_Herbert_Marcuse_False_Needs_Darija.mp4"
+}
+
+
+def derive_friendly_filename(video_path, sb_data, lang, design="paper"):
+    """Return a clean descriptive MP4 filename, defaulting to mapped stems or title/cue slug."""
+    base_name = REEL_FRIENDLY_NAMES.get(video_path.stem)
+    if not base_name:
+        meta = (sb_data or {}).get("post_metadata", {})
+        cues = (sb_data or {}).get("storyboard", [])
+        raw_title = (cues[0].get("title") if cues else None) or meta.get("post_title") or video_path.stem
+        ascii_slug = re.sub(r"[^A-Za-z0-9]+", "_", raw_title).strip("_")[:48]
+        lang_tag = "Darija" if lang in ["ary", "darija", "moroccan"] else lang.upper()
+        stem = ascii_slug or video_path.stem
+        base_name = f"Reel_{stem}_{lang_tag}.mp4"
+
+    if design == "glass":
+        return f"{Path(base_name).stem}_GLASS_DESIGN.mp4"
+    return base_name
+
+
+def write_reel_summary_txt(output_dir, video_filename, sb_data, lang, design="paper"):
+    """Write a per-reel summary/titles .txt and append unseen entries to reels_summary_and_titles.txt."""
+    meta = (sb_data or {}).get("post_metadata", {})
+    cues = (sb_data or {}).get("storyboard", [])
+    title = meta.get("post_title") or Path(video_filename).stem
+    caption = meta.get("caption") or ""
+    hashtags = " ".join(meta.get("hashtags", []))
+    save_cta = meta.get("save_cta") or ""
+    citations = []
+    for cue in cues:
+        cit = cue.get("citation") or {}
+        if cit:
+            parts = [p for p in [cit.get("authors"), cit.get("title"), cit.get("journal")] if p]
+            if parts:
+                citations.append("  - " + " — ".join(parts))
+
+    block = "\n".join([
+        "--------------------------------------------------------------------------------",
+        f"FILE: {video_filename} ({lang.upper()} | Design: {design})",
+        "--------------------------------------------------------------------------------",
+        f"Title: {title}",
+        "",
+        "Beat Headlines & Takeaways:",
+        *[f"  - {c.get('idea', '')}: {c.get('headline', '')}" for c in cues if c.get("idea")],
+        "",
+        "Academic & Empirical Citations:",
+        *(citations or ["  - See transcript metadata"]),
+        "",
+        "Caption & Hook:",
+        caption.strip(),
+        "",
+        f"CTA: {save_cta}" if save_cta else "",
+        f"Hashtags: {hashtags}" if hashtags else "",
+        ""
+    ])
+
+    per_reel_txt = output_dir / f"{Path(video_filename).stem}_summary_and_titles.txt"
+    with open(per_reel_txt, "w", encoding="utf-8") as tf:
+        tf.write(block)
+    print(f"[pipeline] Summary & titles text saved to:\n  {per_reel_txt}")
+
+    master_txt = output_dir / "reels_summary_and_titles.txt"
+    existing = master_txt.read_text(encoding="utf-8") if master_txt.exists() else ""
+    if video_filename not in existing:
+        with open(master_txt, "a", encoding="utf-8") as mf:
+            mf.write("\n" + block)
+
+
+def process_video(video_path, output_dir, lang="en", script=None, script_text=None, bgm_vol=0.045, use_cache=True, design="paper"):
     video_path = Path(video_path).resolve()
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -474,10 +552,15 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
             "-l", lang
         ], "Step 2b: Beat Mapping & English Study Citations")
 
-    # Step 3: Render Master Paper & Objects Reel (Selective Cutout + Academic Notebooks + Loading Counters)
-    print_progress_bar(4, 7, f"Step 3: Rendering Paper & Objects Master Reel ({lang})...")
-    from scripts.render_reel import render_reel_video
-    render_reel_video(cleaned_video, transcript_json, storyboard_json, final_output, lang=lang, bgm_vol=bgm_vol)
+    # Step 3: Render Master Reel (Default primary: "Paper & Objects"; Optional: "Obsidian Glass & HyperFrames")
+    if design == "glass":
+        print_progress_bar(4, 7, f"Step 3: Rendering Obsidian Glass & HyperFrames Master Reel ({lang})...")
+        from scripts.render_glass_reel import render_glass_reel_video
+        render_glass_reel_video(cleaned_video, transcript_json, storyboard_json, final_output, lang=lang, bgm_vol=bgm_vol)
+    else:
+        print_progress_bar(4, 7, f"Step 3: Rendering Paper & Objects Master Reel ({lang})...")
+        from scripts.render_reel import render_reel_video
+        render_reel_video(cleaned_video, transcript_json, storyboard_json, final_output, lang=lang, bgm_vol=bgm_vol)
 
     # Step 4: Automated 6-Point Self-Review Quality Gate (10fps + Timeline Inspection)
     print_progress_bar(7, 7, "Step 4: Running Automated 6-Point Self-Review Quality Gate...")
@@ -486,11 +569,13 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
         "-v", str(final_output),
         "-t", str(transcript_json),
         "-s", str(storyboard_json),
-        "-w", str(workdir)
+        "-w", str(workdir),
+        "--design", design
     ], "Step 4: Automated 6-Point Self-Review Quality Gate")
 
-    verify_production_quality(final_output)
+    verify_production_quality(final_output, design=design)
 
+    sb_data = {}
     credit_summary = None
     if storyboard_json.exists():
         try:
@@ -509,21 +594,19 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
     if credit_summary:
         print_credit_dashboard(credit_summary)
 
-    # Export clean, descriptive filename for production delivery
-    REEL_FRIENDLY_NAMES = {
-        "E8AE11A3-4062-4691-AF49-DD69AC94FBF9": "Reel_1_The_Hidden_Unemployment_Crisis_EN.mp4",
-        "8D33DF6D-7C1A-4784-B8E4-3B7D0A5CFAC4": "Reel_2_The_Hidden_Unemployment_Crisis_Darija.mp4",
-        "DAA97F19-F02A-40FB-B7D2-8BF87A59FDD9": "Reel_3_Herbert_Marcuse_False_Needs_EN.mp4",
-        "F189A3EA-73AF-4BED-A71F-C14272E9D58E": "Reel_4_Herbert_Marcuse_False_Needs_Darija.mp4"
-    }
-    friendly_name = REEL_FRIENDLY_NAMES.get(video_path.stem)
-    if friendly_name:
-        friendly_output = output_dir / friendly_name
-        try:
-            shutil.copy2(str(final_output), str(friendly_output))
-            print(f"[pipeline] Exported descriptive master reel to: {friendly_output}")
-        except Exception as e:
-            print(f"[pipeline] Friendly export note: {e}")
+    # Export clean, descriptive filename & .txt summary/titles for production delivery
+    friendly_name = derive_friendly_filename(video_path, sb_data, lang, design=design)
+    friendly_output = output_dir / friendly_name
+    try:
+        shutil.copy2(str(final_output), str(friendly_output))
+        print(f"[pipeline] Exported descriptive master reel to: {friendly_output}")
+    except Exception as e:
+        print(f"[pipeline] Friendly export note: {e}")
+
+    try:
+        write_reel_summary_txt(output_dir, friendly_name, sb_data, lang, design=design)
+    except Exception as e:
+        print(f"[pipeline] Summary txt note: {e}")
 
     for stray in output_dir.glob(f"{video_path.stem}_PROD_REEL.*"):
         if stray.suffix.lower() != ".mp4":
@@ -533,10 +616,10 @@ def process_video(video_path, output_dir, lang="en", script=None, script_text=No
                 pass
 
     print("\n" + "=" * 72)
-    print("🎬 MASTER PRODUCTION REEL COMPLETE!")
-    print(f"Output Video:  {final_output}")
+    print("MASTER PRODUCTION REEL COMPLETE!")
+    print(f"Output Video:  {friendly_output if friendly_output.exists() else final_output}")
     print("=" * 72 + "\n")
-    return final_output
+    return friendly_output if friendly_output.exists() else final_output
 
 
 def main():
@@ -545,6 +628,7 @@ def main():
     parser.add_argument("--input-folder", "-f", default=str(DEFAULT_REELS_DIR), help="Folder with raw videos")
     parser.add_argument("--output-dir", "-o", default=str(DEFAULT_REELS_DIR / "edited_output"), help="Output directory")
     parser.add_argument("--lang", "-l", default="en", choices=["en", "darija", "ary"], help="Language: en or darija")
+    parser.add_argument("--design", default="paper", choices=["paper", "glass"], help="Visual design style (default: paper)")
     parser.add_argument("--script", "-s", default=None, help="Optional path to reference script file (.txt, .md, .docx)")
     parser.add_argument("--script-text", default=None, help="Optional inline reference script text")
     parser.add_argument("--bgm-vol", type=float, default=0.045, help="Background music volume (default: 0.045)")
@@ -554,7 +638,7 @@ def main():
     use_cache = not args.no_cache
 
     if args.input:
-        process_video(args.input, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache)
+        process_video(args.input, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache, design=args.design)
     else:
         folder = Path(args.input_folder)
         if not folder.exists():
@@ -572,10 +656,10 @@ def main():
         print(f"[pipeline] Found {len(videos)} video file(s) in {folder}")
         for v in videos:
             low_name = v.name.lower()
-            if "_prod_reel" in low_name or "_cleaned" in low_name or "example" in low_name:
+            if "_prod_reel" in low_name or "_cleaned" in low_name or "example" in low_name or "_glass_design" in low_name or low_name.startswith("reel_"):
                 continue
             print(f"\n>>> Processing: {v.name}")
-            process_video(v, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache)
+            process_video(v, args.output_dir, args.lang, script=args.script, script_text=args.script_text, bgm_vol=args.bgm_vol, use_cache=use_cache, design=args.design)
 
 
 if __name__ == "__main__":

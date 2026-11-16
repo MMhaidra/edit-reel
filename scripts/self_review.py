@@ -40,7 +40,7 @@ def get_video_duration(video_path):
         return 0.0
 
 
-def run_six_point_self_review(video_path, transcript_path, storyboard_path, workdir):
+def run_six_point_self_review(video_path, transcript_path, storyboard_path, workdir, design="paper"):
     video_path = Path(video_path)
     transcript_path = Path(transcript_path)
     storyboard_path = Path(storyboard_path)
@@ -139,6 +139,14 @@ def run_six_point_self_review(video_path, transcript_path, storyboard_path, work
                 frame_mean = arr.mean()
                 if frame_mean < 15.0:
                     bg_errors.append(f"Cue {idx} at {mid_t}s fullscreen B-roll is blank/black (mean={frame_mean:.1f})")
+            elif design == "glass":
+                card_region = arr[100:850, 100:980]
+                card_mean = card_region.mean()
+                card_std = card_region.std()
+                if card_mean < 8.0 or card_std < 8.0:
+                    bg_errors.append(
+                        f"Cue {idx} at {mid_t}s top obsidian glass card blank (mean={card_mean:.1f}, std={card_std:.1f})"
+                    )
             else:
                 top_strip_luma = arr[10:30, 100:980].mean()
                 if top_strip_luma < 150.0:
@@ -205,9 +213,10 @@ def main():
     parser.add_argument("--transcript", "-t", required=True, help="Aligned transcript JSON path")
     parser.add_argument("--storyboard", "-s", required=True, help="Storyboard / Beat Map JSON path")
     parser.add_argument("--workdir", "-w", default="./.reel_cache", help="Working directory")
+    parser.add_argument("--design", default="paper", choices=["paper", "glass"], help="Visual design style (default: paper)")
     args = parser.parse_args()
 
-    run_six_point_self_review(args.video, args.transcript, args.storyboard, args.workdir)
+    run_six_point_self_review(args.video, args.transcript, args.storyboard, args.workdir, design=args.design)
 
 
 if __name__ == "__main__":

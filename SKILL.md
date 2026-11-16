@@ -24,9 +24,9 @@ The pipeline supports educational, scientific, academic, macroeconomic, business
 
 ---
 
-## The Signature "Paper & Objects" Aesthetic
+## The Signature "Paper & Objects" Aesthetic (Primary Default)
 
-The pipeline employs an authentic, tactile physical-object visual language:
+Unless `--design glass` is explicitly requested, every pipeline run defaults to (`--design paper`), using an authentic, tactile physical-object visual language:
 
 ### 1. 3-State Alternating Dynamic Rhythm
 - **State 1 — Real Studio Footage (Camera A/B)**:
@@ -94,6 +94,10 @@ The pipeline employs an authentic, tactile physical-object visual language:
   - Drops room preamp hiss during pauses from -45 dB to -51 dB while preserving full vocal tone and chest resonance mastered to **-11.5 LUFS**.
   - **Background Music**: Warm ambient music bed (`ambient_bed.wav`) low-passed at `850 Hz` at `volume=0.045`.
   - **Keyframe-Locked SFX**: Micro-accents (`0.036..0.048` volume) synchronized to object reveal milestones (`paper_turn.wav`, `cash_chime.wav`, `tech_tick.wav`, `subtle_whoosh.wav`).
+- **Automated Output Naming & Summary Export (`pipeline.py`)**:
+  - Automatically exports cleanly titled MP4 filenames (e.g., `Reel_<Title>_<Lang>.mp4`) alongside per-reel `<Video_Stem>_summary_and_titles.txt` and cumulative `reels_summary_and_titles.txt` inside `edited_output/`.
+- **100% Subscription-Free Tooling**:
+  - Uses local open-source tools only (`faster-whisper`, MediaPipe, FFmpeg, PIL, `yt-dlp`, `hyperframes`), zero paid cloud APIs or subscriptions.
 
 ---
 
@@ -172,8 +176,16 @@ The pipeline employs an authentic, tactile physical-object visual language:
   ~/.gemini/config/skills/edit-reel/scripts/download_ref.py "https://..." --audio-only -n reference_audio
 ```
 
-### Secondary Motion Graphics Option (HyperFrames):
+### Secondary Design & Motion Graphics Option (Obsidian Glass & HyperFrames):
 ```bash
+# 0. Run full pipeline using optional Obsidian Glass & HyperFrames aesthetic (--design paper remains default):
+~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
+  ~/.gemini/config/skills/edit-reel/scripts/pipeline.py \
+  --input-folder ~/Desktop/projects/reels_IG \
+  --output-dir ~/Desktop/projects/reels_IG/edited_output \
+  --lang darija \
+  --design glass
+
 # 1. Scaffold a new 9:16 vertical HTML/CSS motion graphics card:
 ~/.gemini/config/skills/edit-reel/.venv/bin/python3 \
   ~/.gemini/config/skills/edit-reel/scripts/hyperframes_engine.py init stat_card -d 6
