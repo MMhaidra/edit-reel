@@ -9,18 +9,27 @@ v9_objects.py - "Paper & Objects" style learned by LOOKING at example.MP4:
 All drawing is supersampled (S=2) so edges are crisp. Pure PIL + numpy.
 """
 import math
+import re
+import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 W, H = 1080, 1920
-PAPER = (226, 221, 209)
-INK = (28, 26, 24)
-INK_SOFT = (96, 90, 82)
+PAPER = (243, 240, 232)
+PAPER_WARM = (226, 221, 209)
+INK = (20, 20, 18)
+CHARCOAL = (20, 20, 18)
+INK_SOFT = (104, 99, 90)
+SAND = (234, 229, 218)
+SAND_DARK = (218, 210, 196)
+CORAL = (204, 90, 67)
+BLUSH = (232, 198, 188)
 GREEN = (0, 112, 74)
+SAGE = (31, 110, 80)
 RED = (186, 24, 40)
 GOLD = (201, 162, 39)
 YELLOW = (250, 204, 21)
-TAG_FILL = (232, 230, 224)
+TAG_FILL = (246, 244, 238)
 S = 2
 
 _TW_PATH = "/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc"
@@ -549,3 +558,623 @@ def draw_subtitle(canvas, text, cy=1540, dark=False, size=64, max_w=880):
         d.text((x, y), text, font=f, fill=(255, 255, 255, 255))
     else:
         d.text((x, y), text, font=f, fill=INK + (255,))
+
+
+# ---------------------------------------------------------------- editorial & 3D pop-out components
+_HN_PATH = "/System/Library/Fonts/HelveticaNeue.ttc"
+_AV_PATH = "/System/Library/Fonts/Avenir Next.ttc"
+_GEORGIA_PATH = "/System/Library/Fonts/Supplemental/Georgia.ttf"
+_GEORGIA_BOLD = "/System/Library/Fonts/Supplemental/Georgia Bold.ttf"
+_GEEZA_PATH = "/System/Library/Fonts/GeezaPro.ttc"
+_ED_FONT_CACHE = {}
+
+
+def ed_sans(size, weight="bold"):
+    """Load crisp Apple Helvetica Neue / Avenir Next sans font with caching."""
+    key = ("sans", int(size), weight)
+    if key in _ED_FONT_CACHE:
+        return _ED_FONT_CACHE[key]
+    idx_map = {"regular": 0, "bold": 1, "medium": 10, "black": 9, "condensed": 4}
+    idx = idx_map.get(weight, 1)
+    try:
+        f = ImageFont.truetype(_HN_PATH, int(size), index=idx)
+    except Exception:
+        try:
+            f = ImageFont.truetype(_SANS_BLACK if weight == "black" else _SANS, int(size))
+        except Exception:
+            f = tw_font(int(size), bold=(weight != "regular"))
+    _ED_FONT_CACHE[key] = f
+    return f
+
+
+def ed_serif(size, bold=False):
+    """Load crisp Georgia editorial serif font for archival book excerpts."""
+    key = ("serif", int(size), bold)
+    if key in _ED_FONT_CACHE:
+        return _ED_FONT_CACHE[key]
+    path = _GEORGIA_BOLD if bold else _GEORGIA_PATH
+    try:
+        f = ImageFont.truetype(path, int(size))
+    except Exception:
+        f = tw_font(int(size), bold=bold)
+    _ED_FONT_CACHE[key] = f
+    return f
+
+
+def ar_sans(size, bold=True):
+    """Load complete Arabic + digit + Latin font (Arial Bold) with 100% Presentation Form coverage."""
+    key = ("ar", int(size), bold)
+    if key in _ED_FONT_CACHE:
+        return _ED_FONT_CACHE[key]
+    path = _SANS if bold else "/System/Library/Fonts/Supplemental/Arial.ttf"
+    f = ImageFont.truetype(path, int(size))
+    _ED_FONT_CACHE[key] = f
+    return f
+
+
+def is_latin_token(text):
+    """Return True when token contains only Latin/numeric/punctuation characters."""
+    if not text:
+        return False
+    return not re.search(r"[\u0600-\u06FF]", str(text))
+
+
+def _ease_out_cubic(x):
+    x = max(0.0, min(1.0, float(x)))
+    return 1.0 - (1.0 - x) ** 3
+
+
+def _ease_out_back(x, s=1.2):
+    x = max(0.0, min(1.0, float(x)))
+    t = x - 1.0
+    return 1.0 + t * t * ((s + 1.0) * t + s)
+
+
+def _rounded_mask(w, h, r):
+    m = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], radius=r, fill=255)
+    return m
+
+
+def draw_provenance_eyebrow(canvas, text, y=156, opacity=1.0):
+    """Draw a minimal, crisp academic source citation eyebrow safely below mobile UI."""
+    if opacity <= 0.02 or not text:
+        return
+    f = ed_sans(23, weight="medium")
+    d = ImageDraw.Draw(canvas)
+    bb = d.textbbox((0, 0), text, font=f)
+    tw = bb[2] - bb[0]
+    if tw > 940:
+        f = ed_sans(20, weight="medium")
+        bb = d.textbbox((0, 0), text, font=f)
+        tw = bb[2] - bb[0]
+    alpha = int(235 * max(0.0, min(1.0, opacity)))
+    tx = (W - tw) // 2 - bb[0]
+    d.text((tx, y), text, font=f, fill=INK_SOFT + (alpha,))
+
+
+def draw_hook_stamp(canvas, badge_text, main_title, el, fade_out=1.0):
+    """Minimal editorial header stamp popping cleanly above speaker head during State 1 hook."""
+    p_in = _ease_out_back(min(1.0, max(0.0, (el - 0.15) / 0.40)))
+    alpha = min(1.0, p_in * fade_out)
+    if alpha <= 0.02:
+        return
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+    f_badge = ed_sans(24, weight="bold")
+    f_main = ed_sans(56, weight="black")
+
+    off_y = int((1.0 - p_in) * -28)
+    cy_badge = 195 + off_y
+    if badge_text:
+        bb = d.textbbox((0, 0), badge_text, font=f_badge)
+        bw = (bb[2] - bb[0]) + 40
+        bh = (bb[3] - bb[1]) + 20
+        bx0 = (W - bw) // 2
+        d.rounded_rectangle(
+            [bx0, cy_badge, bx0 + bw, cy_badge + bh],
+            radius=bh // 2,
+            fill=(243, 240, 232, int(235 * alpha)),
+            outline=(20, 20, 18, int(45 * alpha)),
+            width=2
+        )
+        _center_text(d, W // 2, cy_badge + bh // 2, badge_text, f_badge, CORAL + (int(255 * alpha),))
+
+    if main_title:
+        cy_main = 285 + off_y
+        sh = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+        _center_text(ImageDraw.Draw(sh), W // 2 + 2, cy_main + 4, main_title, f_main, (0, 0, 0, int(145 * alpha)))
+        sh = sh.filter(ImageFilter.GaussianBlur(5))
+        overlay.alpha_composite(sh)
+        _center_text(ImageDraw.Draw(overlay), W // 2, cy_main, main_title, f_main, (250, 248, 243, int(255 * alpha)))
+
+    canvas.alpha_composite(overlay)
+
+
+def draw_layered_stack_plates(canvas, plates, el, active_idx=None, strike_idx=None, strike_at=4.8, highlight_at=8.8, right_badge=None, fade_out=1.0):
+    """
+    Stacked full-width editorial bars inspired by high-retention explainer reels.
+    Each plate slides in with stagger, gently highlights focal concepts in coral (#CC5A43),
+    and optionally reveals a crisp right-side callout badge.
+    """
+    n = len(plates)
+    if n == 0:
+        return
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+    f_label = ed_sans(40, weight="medium")
+    f_badge_big = ed_sans(62, weight="bold")
+    f_badge_sub = ed_sans(24, weight="medium")
+
+    x0, x1 = 76, W - 76
+    bar_h = 104
+    gap = 16
+    top_y = 225
+
+    for idx, label in enumerate(plates):
+        delay = idx * 0.16
+        p = _ease_out_back(min(1.0, max(0.0, (el - delay) / 0.42)))
+        op = min(1.0, p * 1.4) * fade_out
+        if op <= 0.02:
+            continue
+
+        by0 = int(top_y + idx * (bar_h + gap) + (1.0 - p) * 32)
+        by1 = by0 + bar_h
+
+        is_active = (active_idx == idx) and (el >= highlight_at)
+        is_struck = (strike_idx == idx) and (el >= strike_at)
+
+        if is_active:
+            active_t = min(1.0, (el - highlight_at) / 0.35)
+            bg = tuple(int(SAND[c] + (CORAL[c] - SAND[c]) * active_t) for c in range(3))
+            fg = (255, 255, 255, int(255 * op))
+        elif is_struck:
+            bg = SAND_DARK
+            fg = (120, 114, 106, int(220 * op))
+        else:
+            bg = (247, 244, 237) if idx == 0 else SAND
+            fg = INK + (int(255 * op),)
+
+        # Soft ambient card shadow
+        d.rounded_rectangle([x0, by0 + 4, x1, by1 + 6], radius=16, fill=(30, 24, 18, int(22 * op)))
+        d.rounded_rectangle(
+            [x0, by0, x1, by1],
+            radius=16,
+            fill=bg + (int(248 * op),),
+            outline=(195, 188, 174, int(190 * op)),
+            width=2
+        )
+
+        # Left label
+        bb = d.textbbox((0, 0), label, font=f_label)
+        ty = by0 + (bar_h - (bb[3] - bb[1])) // 2 - bb[1]
+        d.text((x0 + 36, ty), label, font=f_label, fill=fg)
+
+        if is_struck:
+            strike_p = min(1.0, max(0.0, (el - strike_at) / 0.35))
+            lw = (bb[2] - bb[0]) + 18
+            mid_y = by0 + bar_h // 2
+            d.line([(x0 + 28, mid_y), (x0 + 28 + int(lw * strike_p), mid_y)], fill=CORAL + (int(230 * op),), width=5)
+
+    # Optional right-side large callout overlaid across lower bars
+    if right_badge and el >= right_badge.get("at", 11.0):
+        bp = _ease_out_back(min(1.0, (el - right_badge["at"]) / 0.45)) * fade_out
+        if bp > 0.02:
+            rx = x1 - 40
+            ry = top_y + 2 * (bar_h + gap) + bar_h // 2 + 12
+            val_txt = right_badge.get("value", "")
+            sub_txt = right_badge.get("sub", "")
+            bbv = d.textbbox((0, 0), val_txt, font=f_badge_big)
+            vw = bbv[2] - bbv[0]
+            vx = rx - vw
+            # Clean cream-sand pill backing so underlying row text stays masked
+            pad_x, pad_y = 26, 14
+            d.rounded_rectangle(
+                [vx - pad_x, ry - 48 - pad_y, rx + pad_x, ry + 62 + pad_y],
+                radius=16,
+                fill=(234, 229, 218, int(252 * bp)),
+            )
+            d.text((vx, ry - 44), val_txt, font=f_badge_big, fill=INK + (int(255 * bp),))
+            bbs = d.textbbox((0, 0), sub_txt, font=f_badge_sub)
+            d.text((rx - (bbs[2] - bbs[0]), ry + 24), sub_txt, font=f_badge_sub, fill=CORAL + (int(255 * bp),))
+
+    canvas.alpha_composite(overlay)
+
+
+def draw_highlighted_excerpt_sheet(canvas, doc_title, text_lines, highlights, cur_t, el, fade_out=1.0):
+    """
+    Renders a realistic off-white archival document / book excerpt sheet with
+    Georgia Serif typography and smooth coral-blush highlighter ink washes
+    synchronized word-by-word to exact acoustic trigger timestamps.
+    """
+    p_in = _ease_out_cubic(min(1.0, el / 0.42))
+    op = min(1.0, p_in * 1.5) * fade_out
+    if op <= 0.02:
+        return
+
+    sheet = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(sheet)
+
+    x0, y0 = 64, int(218 + (1.0 - p_in) * 32)
+    x1, y1 = W - 64, y0 + 448
+
+    # Paper sheet shadow & surface
+    d.rounded_rectangle([x0 + 4, y0 + 14, x1 + 4, y1 + 14], radius=16, fill=(40, 32, 24, int(42 * op)))
+    d.rounded_rectangle(
+        [x0, y0, x1, y1],
+        radius=16,
+        fill=(251, 250, 246, int(252 * op)),
+        outline=(212, 206, 194, int(230 * op)),
+        width=2
+    )
+
+    f_hdr = ed_sans(22, weight="bold")
+    d.text((x0 + 38, y0 + 28), doc_title, font=f_hdr, fill=CORAL + (int(240 * op),))
+    d.line([(x0 + 38, y0 + 64), (x1 - 38, y0 + 64)], fill=(224, 218, 206, int(220 * op)), width=2)
+
+    f_body = ed_serif(39, bold=False)
+    cur_y = y0 + 92
+    line_step = 66
+
+    for line in text_lines:
+        tx = x0 + 42
+        # Check if any highlight substring is inside this line
+        segments = [(line, None)]
+        for phrase, trig_t in highlights:
+            new_segs = []
+            for seg_txt, seg_trig in segments:
+                if seg_trig is None and phrase in seg_txt:
+                    idx_p = seg_txt.index(phrase)
+                    if idx_p > 0:
+                        new_segs.append((seg_txt[:idx_p], None))
+                    new_segs.append((phrase, trig_t))
+                    if idx_p + len(phrase) < len(seg_txt):
+                        new_segs.append((seg_txt[idx_p + len(phrase):], None))
+                else:
+                    new_segs.append((seg_txt, seg_trig))
+            segments = new_segs
+
+        cur_x = tx
+        for seg_txt, seg_trig in segments:
+            bb = d.textbbox((0, 0), seg_txt, font=f_body)
+            sw = bb[2] - bb[0]
+            sh = bb[3] - bb[1]
+            if seg_trig is not None and cur_t >= seg_trig:
+                hp = _ease_out_cubic(min(1.0, (cur_t - seg_trig) / 0.32))
+                hx0 = cur_x - 6
+                hx1 = cur_x + int((sw + 10) * hp)
+                hy0 = cur_y - 4
+                hy1 = cur_y + sh + 16
+                d.rounded_rectangle([hx0, hy0, hx1, hy1], radius=6, fill=BLUSH + (int(220 * op),))
+            d.text((cur_x, cur_y), seg_txt, font=f_body, fill=INK + (int(255 * op),))
+            # Advance accurately using textlength
+            cur_x += int(round(d.textlength(seg_txt, font=f_body)))
+        cur_y += line_step
+
+    d.text((x0 + 42, y1 - 54), "— Ch. 1: The New Forms of Control, p. 9", font=ed_serif(24, bold=False), fill=INK_SOFT + (int(225 * op),))
+    canvas.alpha_composite(sheet)
+
+
+def draw_horizontal_benchmark_bars(canvas, bars, bench_label, bench_ratio, el, title_text=None, fade_out=1.0):
+    """
+    Horizontal bar comparison chart with dashed benchmark vertical rule
+    (learned from Price/Sales & CapEx comparison layouts).
+    bars: list of dict {"label": str, "val": float, "val_str": str, "accent": bool}
+    """
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+
+    f_lbl = ed_sans(32, weight="medium")
+    f_val = ed_sans(32, weight="bold")
+    f_bench = ed_sans(26, weight="bold")
+
+    y_start = 248
+    if title_text:
+        d.text((76, 206), title_text, font=ed_sans(28, weight="bold"), fill=INK + (int(240 * fade_out),))
+        y_start = 294
+
+    label_x = 76
+    bar_x0 = 400
+    bar_max_w = 500
+    row_h = 72
+    row_gap = 26
+
+    # Dashed benchmark vertical line
+    bx = bar_x0 + int(bar_max_w * bench_ratio)
+    line_y0 = y_start - 10
+    line_y1 = y_start + len(bars) * (row_h + row_gap) - row_gap + 12
+    bench_p = min(1.0, max(0.0, el / 0.45)) * fade_out
+    if bench_label and bench_p > 0.05:
+        d.text((bx - 52, line_y0 - 34), bench_label, font=f_bench, fill=INK_SOFT + (int(245 * bench_p),))
+        for dy in range(line_y0, line_y1, 16):
+            d.line([(bx, dy), (bx, min(dy + 9, line_y1))], fill=(90, 85, 78, int(200 * bench_p)), width=3)
+
+    for idx, b in enumerate(bars):
+        delay = 0.25 + idx * 0.22
+        p = _ease_out_cubic(min(1.0, max(0.0, (el - delay) / 0.55)))
+        op = min(1.0, p * 2.0) * fade_out
+        if op <= 0.02:
+            continue
+
+        ry = y_start + idx * (row_h + row_gap)
+        # Left card pill
+        d.rounded_rectangle(
+            [label_x, ry, bar_x0 - 18, ry + row_h],
+            radius=12,
+            fill=(248, 246, 240, int(245 * op)),
+            outline=(205, 198, 184, int(220 * op)),
+            width=2
+        )
+        _center_text(d, (label_x + bar_x0 - 18) // 2, ry + row_h // 2, b["label"], f_lbl, INK + (int(255 * op),))
+
+        # Horizontal bar
+        bw = max(8, int(bar_max_w * b["ratio"] * p))
+        bar_col = CORAL if b.get("accent") else CHARCOAL
+        if b.get("muted"):
+            bar_col = SAND_DARK
+        d.rounded_rectangle([bar_x0, ry + 10, bar_x0 + bw, ry + row_h - 10], radius=10, fill=bar_col + (int(245 * op),))
+
+        if p > 0.35:
+            val_op = min(1.0, (p - 0.35) / 0.35) * op
+            val_col = CORAL if b.get("accent") else INK
+            d.text((bar_x0 + bw + 14, ry + 18), b["val_str"], font=f_val, fill=val_col + (int(255 * val_op),))
+
+    canvas.alpha_composite(overlay)
+
+
+def draw_slider_switch_track(canvas, left_label, right_label, slide_p, y=385, opacity=1.0):
+    """
+    Minimal horizontal slider track inspired by Fair Value estimate UI (@ 110s):
+    glides a rounded rectangle thumb smoothly from left_label to right_label.
+    """
+    if opacity <= 0.02:
+        return
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+    f_tag = ed_sans(30, weight="bold")
+    f_sub = ed_sans(25, weight="medium")
+
+    x0, x1 = 150, W - 150
+    d.line([(x0, y), (x1, y)], fill=INK + (int(220 * opacity),), width=4)
+
+    tx0, tx1 = x0 + 130, x1 - 130
+    cur_x = int(tx0 + (tx1 - tx0) * max(0.0, min(1.0, slide_p)))
+    is_right = slide_p >= 0.72
+    fill_c = CORAL if is_right else SAND_DARK
+    text_c_in = (255, 255, 255) if is_right else INK
+    active_txt = right_label if is_right else left_label
+    bb_act = d.textbbox((0, 0), active_txt, font=f_tag)
+    thumb_w = max(210, (bb_act[2] - bb_act[0]) + 56)
+    thumb_h = 66
+
+    d.rounded_rectangle(
+        [cur_x - thumb_w // 2, y - thumb_h // 2, cur_x + thumb_w // 2, y + thumb_h // 2],
+        radius=12,
+        fill=fill_c + (int(250 * opacity),),
+        outline=INK + (int(230 * opacity),),
+        width=2
+    )
+    _center_text(d, cur_x, y, active_txt, f_tag, text_c_in + (int(255 * opacity),))
+
+    # Endpoint labels below line (omit when active thumb covers that side to prevent duplicate text)
+    if slide_p > 0.28:
+        d.text((x0 + 20, y + 48), left_label, font=f_sub, fill=INK_SOFT + (int(230 * opacity),))
+    if not is_right:
+        bbr = d.textbbox((0, 0), right_label, font=f_sub)
+        d.text((x1 - 20 - (bbr[2] - bbr[0]), y + 48), right_label, font=f_sub, fill=INK_SOFT + (int(235 * opacity),))
+
+    canvas.alpha_composite(overlay)
+
+
+def draw_full_compare_columns(canvas, left_cfg, right_cfg, el, fade_out=1.0):
+    """
+    Full-canvas State 3 2-Column Analytical Contrast (inspired by $900B Fixed vs Revenue @ 95s).
+    Left: Solid dark charcoal rounded card with bold headline + sequential symptom pills.
+    Right: Tall warm sand/blush stacked proportional card with horizontal dividers.
+    """
+    p_cols = _ease_out_back(min(1.0, el / 0.50))
+    op = min(1.0, p_cols * 1.4) * fade_out
+    if op <= 0.02:
+        return
+
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+
+    col_w = 452
+    col_h = 920
+    lx0 = 72
+    rx0 = W - 72 - col_w
+    y0 = int(320 + (1.0 - p_cols) * 40)
+
+    f_hdr = ed_serif(34, bold=True)
+    f_big = ed_sans(56, weight="black")
+    f_pill = ed_sans(32, weight="bold")
+    f_small = ed_sans(28, weight="medium")
+
+    # Headers above columns
+    _center_text(d, lx0 + col_w // 2, y0 - 44, left_cfg["header"], f_hdr, INK + (int(255 * op),))
+    _center_text(d, rx0 + col_w // 2, y0 - 44, right_cfg["header"], f_hdr, INK + (int(255 * op),))
+
+    # Left dark charcoal card
+    d.rounded_rectangle([lx0, y0, lx0 + col_w, y0 + col_h], radius=26, fill=CHARCOAL + (int(252 * op),))
+    _center_text(d, lx0 + col_w // 2, y0 + 185, left_cfg["big_title"], f_big, (250, 248, 243, int(255 * op)))
+    _center_text(d, lx0 + col_w // 2, y0 + 255, left_cfg["subtitle"], f_small, SAND_DARK + (int(220 * op),))
+
+    # Sequential terracotta pills popping inside left dark column
+    for i, item in enumerate(left_cfg.get("items", [])):
+        trig = item.get("at", 0.6 + i * 1.5)
+        if el >= trig:
+            ip = _ease_out_back(min(1.0, (el - trig) / 0.42))
+            iop = min(1.0, ip * 1.8) * op
+            py = int(y0 + 380 + i * 138 + (1.0 - ip) * 24)
+            px0, px1 = lx0 + 42, lx0 + col_w - 42
+            d.rounded_rectangle([px0, py, px1, py + 98], radius=16, fill=CORAL + (int(245 * iop),))
+            _center_text(d, (px0 + px1) // 2, py + 49, item["text"], f_pill, (255, 255, 255, int(255 * iop)))
+
+    # Right warm proportional stacked card
+    d.rounded_rectangle([rx0, y0, rx0 + col_w, y0 + col_h], radius=26, fill=(247, 244, 238, int(250 * op)), outline=INK + (int(235 * op),), width=3)
+
+    # Top segment (blush/terracotta tint)
+    split_y1 = y0 + int(col_h * 0.34)
+    d.rounded_rectangle([rx0 + 4, y0 + 4, rx0 + col_w - 4, split_y1 + 20], radius=22, fill=BLUSH + (int(240 * op),))
+    d.rectangle([rx0 + 4, split_y1 - 24, rx0 + col_w - 4, split_y1], fill=BLUSH + (int(240 * op),))
+    d.line([(rx0, split_y1), (rx0 + col_w, split_y1)], fill=INK + (int(230 * op),), width=3)
+    _center_text(d, rx0 + col_w // 2, y0 + int(col_h * 0.17), right_cfg["top_label"], f_pill, INK + (int(255 * op),))
+
+    # Middle badge bar
+    split_y2 = y0 + int(col_h * 0.48)
+    d.rectangle([rx0 + 4, split_y1, rx0 + col_w - 4, split_y2], fill=SAND_DARK + (int(235 * op),))
+    d.line([(rx0, split_y2), (rx0 + col_w, split_y2)], fill=INK + (int(230 * op),), width=3)
+    _center_text(d, rx0 + col_w // 2, (split_y1 + split_y2) // 2, right_cfg["mid_label"], f_small, INK + (int(255 * op),))
+
+    # Bottom large block
+    _center_text(d, rx0 + col_w // 2, split_y2 + 150, right_cfg["bot_big"], f_big, INK + (int(255 * op),))
+    _center_text(d, rx0 + col_w // 2, split_y2 + 235, right_cfg["bot_sub"], f_small, INK_SOFT + (int(240 * op),))
+
+    canvas.alpha_composite(overlay)
+
+
+def _clean_head_popout_mask(mask_crop, anchor_x_local):
+    """
+    Keeps ONLY the primary connected head component touching the bottom edge
+    near anchor_x_local so detached floating hand fragments or wall artifacts
+    never bleed above the rounded portrait card border.
+    """
+    h, w = mask_crop.shape
+    if h < 8 or w < 8:
+        return mask_crop
+    # Clamp pop-out horizontally to strict head zone so raised outer hands stay inside card
+    masked_band = mask_crop.copy()
+    hx_min = max(0, int(anchor_x_local - 220))
+    hx_max = min(w, int(anchor_x_local + 220))
+    masked_band[:, :hx_min] = 0.0
+    masked_band[:, hx_max:] = 0.0
+
+    bw = (masked_band > 0.44).astype(np.uint8)
+    num_lbl, labels, stats, centroids = cv2.connectedComponentsWithStats(bw, connectivity=8)
+    if num_lbl <= 1:
+        return masked_band
+    keep = np.zeros_like(bw)
+    for lbl in range(1, num_lbl):
+        area = int(stats[lbl, cv2.CC_STAT_AREA])
+        top = int(stats[lbl, cv2.CC_STAT_TOP])
+        comp_h = int(stats[lbl, cv2.CC_STAT_HEIGHT])
+        cx = float(centroids[lbl][0])
+        touches_card = (top + comp_h) >= (h - 24)
+        near_face = abs(cx - anchor_x_local) < 135.0
+        if area >= 900 and touches_card and near_face:
+            keep[labels == lbl] = 1
+    if keep.sum() == 0:
+        return np.zeros_like(mask_crop)
+    keep = cv2.dilate(keep, np.ones((5, 5), np.uint8), iterations=1)
+    m = cv2.GaussianBlur(masked_band * keep.astype(np.float32), (5, 5), 1.4)
+    m = np.clip((m - 0.36) / 0.28, 0.0, 1.0)
+    return m * m * (3.0 - 2.0 * m)
+
+
+def composite_popout_speaker_card(
+    canvas,
+    frame_np,
+    mask_f32,
+    smoothed_head_top=320.0,
+    smoothed_head_cx=540.0,
+    lower_p=1.0,
+    card_rect=(190, 1155, 700, 575),
+    target_head_top_y=855,
+    card_scale=0.72,
+    radius=30,
+):
+    """
+    Composites the speaker inside an elevated rounded studio card (`card_rect`) on paper,
+    keeping torso/hands 100% solid inside the card while allowing the segmented head
+    to pop cleanly above the top edge (`target_head_top_y .. card_y0`) in 3D.
+    """
+    cx0, cy0, cw, ch = card_rect
+    lp = max(0.0, min(1.0, float(lower_p)))
+
+    if lp <= 0.02:
+        canvas.alpha_composite(Image.fromarray(frame_np, "RGB").convert("RGBA"))
+        return
+
+    # Smooth transition between full-bleed (0,0,1080,1920) and target rounded card
+    sc = 1.0 + (card_scale - 1.0) * lp
+    sw = max(cw, int(round(1080 * sc)))
+    sh = max(ch, int(round(1920 * sc)))
+
+    cur_x0 = int(round(0 + cx0 * lp))
+    cur_y0 = int(round(0 + cy0 * lp))
+    cur_x1 = int(round(1080 + (cx0 + cw - 1080) * lp))
+    cur_y1 = int(round(1920 + (cy0 + ch - 1920) * lp))
+    cur_w = max(16, cur_x1 - cur_x0)
+    cur_h = max(16, cur_y1 - cur_y0)
+    cur_r = int(round(radius * lp))
+
+    # Position scaled speaker so head_top settles cleanly at target_head_top_y (855)
+    dest_ht = int(round(0 * (1.0 - lp) + (target_head_top_y - smoothed_head_top * sc) * lp))
+    # Clamp vertically so card stays 100% filled from top to bottom
+    sy = min(cur_y0, max(cur_y1 - sh, dest_ht))
+    # Center horizontally around face centroid while guaranteeing zero empty side gaps inside card
+    sx_ideal = int(round((W / 2.0) - smoothed_head_cx * sc))
+    sx = max(cur_x1 - sw, min(cur_x0, sx_ideal))
+
+    # Fast OpenCV resize of speaker RGB
+    frame_scaled = cv2.resize(frame_np, (sw, sh), interpolation=cv2.INTER_LINEAR)
+
+    # 1. Extract card interior crop directly from scaled camera frame (100% solid shoulders & hands)
+    rx0 = max(0, cur_x0 - sx)
+    ry0 = max(0, cur_y0 - sy)
+    card_rgb = frame_scaled[ry0:ry0 + cur_h, rx0:rx0 + cur_w]
+    if card_rgb.shape[0] != cur_h or card_rgb.shape[1] != cur_w:
+        card_rgb = cv2.resize(card_rgb, (cur_w, cur_h), interpolation=cv2.INTER_LINEAR)
+
+    # Drop shadow behind elevated studio card
+    if lp > 0.15:
+        sh_im = Image.new("RGBA", (cur_w + 48, cur_h + 48), (0, 0, 0, 0))
+        ImageDraw.Draw(sh_im).rounded_rectangle(
+            [24, 24, 24 + cur_w - 1, 24 + cur_h - 1],
+            radius=max(1, cur_r),
+            fill=(24, 20, 16, int(52 * lp))
+        )
+        sh_im = sh_im.filter(ImageFilter.GaussianBlur(14))
+        canvas.alpha_composite(sh_im, (cur_x0 - 24, cur_y0 - 16))
+
+    card_im = Image.fromarray(card_rgb, "RGB").convert("RGBA")
+    if cur_r > 2:
+        card_im.putalpha(_rounded_mask(cur_w, cur_h, cur_r))
+    canvas.alpha_composite(card_im, (cur_x0, cur_y0))
+
+    # Subtle crisp 1.5px editorial border around studio card
+    if lp > 0.25:
+        b_im = Image.new("RGBA", (cur_w, cur_h), (0, 0, 0, 0))
+        ImageDraw.Draw(b_im).rounded_rectangle(
+            [0, 0, cur_w - 1, cur_h - 1],
+            radius=max(1, cur_r),
+            outline=(255, 253, 248, int(145 * lp)),
+            width=2
+        )
+        canvas.alpha_composite(b_im, (cur_x0, cur_y0))
+
+    # 2. Pop-out head segmentation ONLY above card top edge (cur_y0) up to stage safety zone
+    pop_top_canvas = max(0, cur_y0 - 340)
+    pop_bot_canvas = min(1920, cur_y0 + 16)
+    if pop_bot_canvas > pop_top_canvas + 8 and lp > 0.10:
+        ry_pop0 = pop_top_canvas - sy
+        ry_pop1 = pop_bot_canvas - sy
+        # Compute intersection in scaled frame space
+        s_y0 = max(0, ry_pop0)
+        s_y1 = min(sh, ry_pop1)
+        s_x0 = max(0, cur_x0 - sx)
+        s_x1 = min(sw, cur_x1 - sx)
+        if s_y1 > s_y0 + 4 and s_x1 > s_x0 + 4:
+            mask_scaled = cv2.resize(mask_f32, (sw, sh), interpolation=cv2.INTER_LINEAR)
+            head_mask_crop = mask_scaled[s_y0:s_y1, s_x0:s_x1]
+            face_local_x = int(round(smoothed_head_cx * sc)) - s_x0
+            clean_m = _clean_head_popout_mask(head_mask_crop, face_local_x)
+            # Smooth bottom overlap blend into card interior so hairline edge has zero seam
+            if clean_m.shape[0] > 14:
+                clean_m[-14:, :] *= np.linspace(1.0, 0.0, 14)[:, None]
+            head_rgb = frame_scaled[s_y0:s_y1, s_x0:s_x1]
+            head_alpha = (clean_m * 255.0 * min(1.0, lp * 1.15)).astype(np.uint8)
+            head_im = Image.fromarray(np.dstack([head_rgb, head_alpha]), "RGBA")
+            canvas.alpha_composite(head_im, (sx + s_x0, sy + s_y0))
+

@@ -509,72 +509,185 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         paste_sprite(canvas, bank["chip_pricing_power"], 770, 480, offset_y=(1.0 - p_c2) * 35, opacity=min(1.0, p_c2))
 
     elif btype == "marcuse_false_needs":
-        # Beat 1 (Marcuse): Notebook cutoff + False Needs slip + 3 Commodity Chips
-        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
-        paste_sprite(canvas, bank["note_marcuse"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+        # Beat 1 (Marcuse): Provenance eyebrow + Layered Stack Plates + Right Callout Badge
+        kicker = cue.get("kicker") or "Herbert Marcuse (1964) • One-Dimensional Man • Beacon Press"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        tr = cue.get("triggers") or {}
+        strike_at = float(tr.get("strike_at", 4.8))
+        highlight_at = float(tr.get("highlight_at", 9.0))
+        badge_at = float(tr.get("badge_at", 16.5))
 
-        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
-        paste_sprite(canvas, bank["slip_false_needs"], 540, 340, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+        plates = [
+            "Coercion & Force",
+            "False Needs",
+            "Endless Work",
+            "Temporary Numbing",
+        ]
+        right_badge = {"value": "TRAPPED", "sub": "Manufactured Desires", "at": badge_at}
+        V.draw_layered_stack_plates(
+            canvas,
+            plates,
+            el=el,
+            active_idx=1,
+            strike_idx=0,
+            strike_at=strike_at,
+            highlight_at=highlight_at,
+            right_badge=right_badge,
+            fade_out=fade_out,
+        )
 
-        p1 = ease_out_back(min(1.0, max(0.0, (el - 0.30) / 0.45))) * fade_out
-        p2 = ease_out_back(min(1.0, max(0.0, (el - 0.45) / 0.45))) * fade_out
-        p3 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
+    elif btype == "marcuse_quote_excerpt":
+        # Beat 2 (Marcuse Quote): Archival Serif Book Sheet with acoustic blush highlighter sweeps
+        kicker = cue.get("kicker") or "One-Dimensional Man (1964) • Ch. 1: New Forms of Control"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
 
-        paste_sprite(canvas, bank["chip_auto"], 280, 435, offset_y=(1.0 - p1) * 35, opacity=min(1.0, p1))
-        paste_sprite(canvas, bank["chip_tech"], 790, 435, offset_y=(1.0 - p2) * 35, opacity=min(1.0, p2))
-        paste_sprite(canvas, bank["chip_home"], 540, 535, offset_y=(1.0 - p3) * 35, opacity=min(1.0, p3))
+        highlights = cue.get("highlights") or [
+            ["automobile", st + 4.8],
+            ["hi-fi set", st + 6.4],
+            ["split-level home", st + 8.0],
+        ]
+        lines = [
+            '"The people recognize themselves',
+            'in their commodities; they find',
+            'their soul in their automobile,',
+            'hi-fi set, split-level home..."',
+        ]
+        V.draw_highlighted_excerpt_sheet(
+            canvas,
+            "ONE-DIMENSIONAL MAN  •  BEACON PRESS (1964)",
+            lines,
+            highlights=highlights,
+            cur_t=cur_t,
+            el=el,
+            fade_out=fade_out,
+        )
 
     elif btype == "brickman_hedonic_treadmill":
-        # Beat 2 (Marcuse): Notebook cutoff + Hedonic Treadmill dopamine spike & reset (No overlapping slips)
-        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
-        paste_sprite(canvas, bank["note_brickman"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+        # Beat 3 (Brickman 1978): Benchmark baseline curve + Hedonic upgrade slider track
+        kicker = cue.get("kicker") or "Philip Brickman et al. (1978) • J. Personality & Social Psychology"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        tr = cue.get("triggers") or {}
+        spike_t = float(tr.get("spike_t", st + 6.2))
+        reset_t = float(tr.get("reset_t", st + 9.8))
 
-        d = ImageDraw.Draw(canvas)
-        base_y, x0, x1 = 570, 140, 940
-        d.line([(x0, base_y), (x1, base_y)], fill=V.GOLD + (255,), width=4)
-        V.text_c(canvas, 330, base_y + 24, "HAPPINESS BASELINE", bank["F28"], V.GOLD)
+        overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+        d = ImageDraw.Draw(overlay)
+        f_title = V.ed_sans(32, weight="bold")
+        f_sub = V.ed_sans(24, weight="medium")
 
-        curve_p = ease_in_out_cubic(min(1.0, max(0.0, (el - 0.25) / 1.5)))
-        n_pts = max(2, int(75 * curve_p))
+        d.text((84, 214), "HEDONIC TREADMILL", font=f_title, fill=V.INK + (int(255 * fade_out),))
+
+        # Baseline dashed line + peak curve (y = 290..560)
+        base_y, x0, x1 = 530, 96, 984
+        for dx in range(x0, x1, 20):
+            d.line([(dx, base_y), (min(dx + 10, x1), base_y)], fill=V.INK_SOFT + (int(210 * fade_out),), width=4)
+        d.text((x0, base_y + 14), "EMOTIONAL SET POINT (BASELINE)", font=f_sub, fill=V.INK_SOFT + (int(235 * fade_out),))
+
+        # Curve progresses from start through windfall peak (~3.5s -> spike)
+        curve_p = ease_in_out_cubic(min(1.0, max(0.0, (el - 0.35) / 3.2)))
+        n_pts = max(2, int(84 * curve_p))
         if n_pts >= 2 and curve_p > 0.02:
             pts = []
             for k in range(n_pts):
-                u = k / 74.0
-                px = x0 + 20 + u * (x1 - x0 - 40)
-                if u < 0.22:
-                    py = base_y - math.sin(u / 0.22 * math.pi / 2.0) * 150.0
+                u = k / 83.0
+                px = x0 + 18 + u * (x1 - x0 - 36)
+                if u < 0.24:
+                    py = base_y - math.sin(u / 0.24 * math.pi / 2.0) * 215.0
                 else:
-                    py = base_y - math.exp(-(u - 0.22) * 6.5) * 150.0
+                    py = base_y - math.exp(-(u - 0.24) * 5.8) * 215.0
                 pts.append((px, py))
-            V.ink_line(canvas, pts, V.GREEN, 8)
+            V.ink_line(overlay, pts, V.CORAL, 9)
 
-        p_spike = ease_out_back(min(1.0, max(0.0, (el - 0.50) / 0.40))) * fade_out
-        p_base = ease_out_back(min(1.0, max(0.0, (el - 1.10) / 0.45))) * fade_out
-        paste_sprite(canvas, bank["chip_spike"], 340, 355, offset_y=(1.0 - p_spike) * 30, opacity=min(1.0, p_spike))
-        paste_sprite(canvas, bank["chip_baseline"], 780, 495, offset_y=(1.0 - p_base) * 30, opacity=min(1.0, p_base))
+        # Callout pills around curve
+        if cur_t >= min(spike_t, st + 1.8):
+            p_sp = ease_out_back(min(1.0, (cur_t - min(spike_t, st + 1.8)) / 0.42)) * fade_out
+            d.rounded_rectangle([240, 270, 520, 326], radius=14, fill=V.CORAL + (int(245 * p_sp),))
+            V._center_text(d, 380, 298, "NEW GAIN SPIKE", V.ed_sans(26, weight="bold"), (255, 255, 255, int(255 * p_sp)))
+
+        if cur_t >= min(reset_t, st + 5.2):
+            p_rs = ease_out_back(min(1.0, (cur_t - min(reset_t, st + 5.2)) / 0.42)) * fade_out
+            d.rounded_rectangle([650, 420, 968, 476], radius=14, fill=V.CHARCOAL + (int(242 * p_rs),))
+            V._center_text(d, 809, 448, "ADAPTATION RESET", V.ed_sans(24, weight="bold"), (250, 248, 243, int(255 * p_rs)))
+
+        canvas.alpha_composite(overlay)
+
+        # Lower slider track showing endless upgrade cycle
+        slide_raw = max(0.0, min(1.0, (el - 3.5) / max(4.0, dur - 4.5)))
+        V.draw_slider_switch_track(canvas, "UPGRADE HIGH", "BACK TO BASELINE", ease_in_out_cubic(slide_raw), y=695, opacity=fade_out)
 
     elif btype == "kasser_ryan_dark_side":
-        # Beat 3 (Marcuse): Clean notebook cutoff + Anxiety & Status chips
-        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
-        paste_sprite(canvas, bank["note_kasser"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+        # Beat 4A (Kasser & Ryan 1993): Horizontal Empirical Comparison Bars
+        kicker = cue.get("kicker") or "Tim Kasser & Richard Ryan (1993) • J. Personality & Social Psychology"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        bars = [
+            {"label": "Intrinsic Vitality", "ratio": 0.36, "val_str": "-34%", "muted": True, "accent": False},
+            {"label": "Self-Actualization", "ratio": 0.42, "val_str": "-29%", "muted": True, "accent": False},
+            {"label": "Anxiety Symptoms", "ratio": 0.80, "val_str": "+HIGH", "muted": False, "accent": False},
+            {"label": "Depression Risk", "ratio": 0.90, "val_str": "+SPIKE", "muted": False, "accent": True},
+        ]
+        V.draw_horizontal_benchmark_bars(
+            canvas,
+            bars,
+            bench_label="Baseline (0)",
+            bench_ratio=0.18,
+            el=el,
+            title_text="Financial Aspiration vs Well-Being",
+            fade_out=fade_out,
+        )
 
-        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.30) / 0.45))) * fade_out
-        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.60) / 0.45))) * fade_out
-        paste_sprite(canvas, bank["chip_material_goals"], 540, 360, offset_y=(1.0 - p_c1) * 35, opacity=min(1.0, p_c1))
-        paste_sprite(canvas, bank["chip_anxiety"], 540, 495, offset_y=(1.0 - p_c2) * 35, opacity=min(1.0, p_c2))
+    elif btype == "kasser_dark_side_compare":
+        # Beat 4B (State 3 Full-Canvas 2-Column Compare): Material Identity Trap vs Well-Being
+        kicker = cue.get("kicker") or "Kasser & Ryan (1993) • Correlates of Financial Aspiration"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        tr = cue.get("triggers") or {}
+        left_cfg = {
+            "header": "Wealth-First Trap",
+            "big_title": "BRAIN",
+            "subtitle": "Tied to Status & Money",
+            "items": [
+                {"text": "ANXIETY UP", "at": float(tr.get("anx_at", 1.2))},
+                {"text": "CHRONIC STRESS", "at": float(tr.get("stress_at", 2.8))},
+                {"text": "DEPRESSION RISK", "at": float(tr.get("depr_at", 4.2))},
+            ],
+        }
+        right_cfg = {
+            "header": "Intrinsic Well-Being",
+            "top_label": "Material Status",
+            "mid_label": "Even If Wealthy",
+            "bot_big": "FRAGILE",
+            "bot_sub": "Lower Daily Vitality",
+        }
+        V.draw_full_compare_columns(canvas, left_cfg, right_cfg, el=el, fade_out=fade_out)
 
     elif btype == "bauer_cuing_consumerism":
-        # Beat 4 (Marcuse): Notebook cutoff + Individual -> Consumer chip + Stress Spike
-        p_note = ease_out_back(min(1.0, el / 0.40)) * fade_out
-        paste_sprite(canvas, bank["note_bauer"], 540, NOTE_Y_SPEAKER, offset_y=-(1.0 - p_note) * 40, opacity=min(1.0, p_note))
+        # Beat 5 (Bauer et al. 2012): Horizontal Label Switch Slider + Stress Impact Bars
+        kicker = cue.get("kicker") or "Monika A. Bauer et al. (2012) • Psychological Science (Vol. 23)"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        tr = cue.get("triggers") or {}
+        slide_t = float(tr.get("slide_t", st + 5.5))
+        bars_t = float(tr.get("bars_t", st + 10.0))
 
-        p0 = ease_out_cubic(min(1.0, max(0.0, (el - 0.15) / 0.40))) * fade_out
-        paste_sprite(canvas, bank["slip_cuing_consumerism"], 540, 340, scale=0.92 + 0.08 * min(1.0, p0), opacity=min(1.0, p0))
+        slide_prog = ease_in_out_cubic(min(1.0, max(0.0, (cur_t - max(st + 1.0, slide_t - 1.2)) / 1.4)))
+        V.draw_slider_switch_track(canvas, "INDIVIDUAL", "CONSUMER", slide_prog, y=268, opacity=fade_out)
 
-        p_c1 = ease_out_back(min(1.0, max(0.0, (el - 0.35) / 0.45))) * fade_out
-        p_c2 = ease_out_back(min(1.0, max(0.0, (el - 0.65) / 0.45))) * fade_out
-        paste_sprite(canvas, bank["chip_ind_to_cons"], 540, 435, offset_y=(1.0 - p_c1) * 35, opacity=min(1.0, p_c1))
-        paste_sprite(canvas, bank["chip_stress_spike"], 540, 540, offset_y=(1.0 - p_c2) * 35, opacity=min(1.0, p_c2))
+        if cur_t >= max(st + 2.5, bars_t - 1.5):
+            el_bars = max(0.0, cur_t - max(st + 2.5, bars_t - 1.5))
+            bars = [
+                {"label": "Stress Response", "ratio": 0.84, "val_str": "SPIKE", "accent": True},
+                {"label": "Insecurity", "ratio": 0.72, "val_str": "HIGH", "accent": False},
+                {"label": "Envy & Comparison", "ratio": 0.78, "val_str": "HIGH", "accent": False},
+            ]
+            # Offset cleanly below slider track with generous headroom above portrait
+            sub_canvas = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+            V.draw_horizontal_benchmark_bars(
+                sub_canvas,
+                bars,
+                bench_label="Neutral Cue",
+                bench_ratio=0.20,
+                el=el_bars,
+                fade_out=fade_out,
+            )
+            canvas.alpha_composite(sub_canvas, (0, 155))
 
     elif btype == "three_pillars":
         # Beat 7: Notebook cutoff + 3 hanging tags synced to step_timestamps
@@ -603,8 +716,35 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
                 paste_sprite(canvas, bank[key], cx, cur_top_y + bank[f"{key}_h"] / 2 - 10 / V.S, opacity=min(1.0, p_val * 2.5))
 
 
-def build_subtitle_chunks(transcript_data, total_duration, is_arabic=False):
-    font_sub = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf" if is_arabic else "/System/Library/Fonts/Supplemental/Arial Black.ttf", 52 if is_arabic else 50)
+def _draw_soft_shadow_text(canvas, xy, txt, font, fill_col, shadow_col, is_light_bg=False):
+    d = ImageDraw.Draw(canvas)
+    x, y = xy
+    if is_light_bg:
+        d.text((x, y), txt, font=font, fill=fill_col)
+    else:
+        d.text((x + 2, y + 4), txt, font=font, fill=shadow_col, stroke_width=2, stroke_fill=shadow_col)
+        d.text((x, y), txt, font=font, fill=fill_col, stroke_width=1, stroke_fill=(14, 14, 14, 210))
+
+
+def _measure_word_box(w_str, is_arabic, font_ar, font_latin, font_mixed_ar=None):
+    is_lat = V.is_latin_token(w_str)
+    if is_arabic and is_lat:
+        use_font = font_latin
+    elif is_arabic and re.search(r"[A-Za-z0-9:;\!\?\(\)]", str(w_str)):
+        use_font = font_mixed_ar or font_ar
+    else:
+        use_font = font_ar
+    disp_str = w_str if is_lat else shape_text(w_str)
+    bbox = use_font.getbbox(disp_str)
+    w_w = bbox[2] - bbox[0]
+    w_h = bbox[3] - bbox[1]
+    return w_str, disp_str, w_w, w_h, use_font, is_lat
+
+
+def build_subtitle_chunks(transcript_data, total_duration, is_arabic=False, max_line_width=610):
+    font_sub = V.ar_sans(48, bold=True) if is_arabic else V.ed_sans(48, weight="bold")
+    font_latin = V.ed_sans(45, weight="bold")
+    font_mixed_ar = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 48)
     segments = transcript_data.get("segments", [])
     timed_words = []
     for seg in segments:
@@ -612,16 +752,13 @@ def build_subtitle_chunks(transcript_data, total_duration, is_arabic=False):
             timed_words.append(w)
 
     chunks = []
-    spacing = 18
+    spacing = 16
     curr_words = []
     curr_w = 0
-    max_line_width = 860
 
     for w in timed_words:
         w_text = w["word"].upper() if not is_arabic else w["word"]
-        disp = shape_text(w_text) if is_arabic else w_text
-        bbox = font_sub.getbbox(disp)
-        w_w = bbox[2] - bbox[0]
+        _, _, w_w, _, _, _ = _measure_word_box(w_text, is_arabic, font_sub, font_latin, font_mixed_ar)
         needed_w = curr_w + (spacing if curr_words else 0) + w_w
         max_chunk = 3 if is_arabic else (3 if len(w_text) <= 4 or (curr_words and len(curr_words[0]["word"]) <= 3) else 2)
         if len(curr_words) >= max_chunk or (curr_words and needed_w > max_line_width):
@@ -653,7 +790,7 @@ def build_subtitle_chunks(transcript_data, total_duration, is_arabic=False):
     return chunks, font_sub
 
 
-def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=False):
+def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=None):
     active_chunk = None
     for c in chunks:
         if c["start"] <= cur_t <= c["end"] + 0.06:
@@ -667,44 +804,63 @@ def draw_active_subtitle(canvas, chunks, cur_t, is_arabic, font_sub, dark_mode=F
         if w["start"] <= cur_t:
             active_word_idx = w_i
 
+    font_latin = V.ed_sans(45, weight="bold")
+    font_mixed_ar = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 48)
     words_list = [w["word"].upper() if not is_arabic else w["word"] for w in active_chunk["words"]]
-    spacing = 18
+    spacing = 16
     word_boxes = []
     total_w = 0
-    for idx, w_str in enumerate(words_list):
-        disp_str = shape_text(w_str) if is_arabic else w_str
-        bbox = font_sub.getbbox(disp_str)
-        w_w = bbox[2] - bbox[0]
-        w_h = bbox[3] - bbox[1]
-        word_boxes.append((w_str, disp_str, w_w, w_h))
-        total_w += w_w
+    for w_str in words_list:
+        box = _measure_word_box(w_str, is_arabic, font_sub, font_latin, font_mixed_ar)
+        word_boxes.append((len(word_boxes), *box))
+        total_w += box[2]
     total_w += spacing * (len(words_list) - 1)
 
     start_x = (V.W - total_w) // 2
-    cy = 1710 if dark_mode else 1555
-    d = ImageDraw.Draw(canvas)
+    cy = cy_override if cy_override is not None else (1565 if dark_mode else 1545)
 
-    stroke_col = (250, 248, 243, 255) if dark_mode else (18, 16, 14, 255)
-    shadow_col = (40, 35, 28, 90) if dark_mode else (10, 10, 10, 220)
+    shadow_col = (0, 0, 0, 175)
     base_fill = V.INK + (255,) if dark_mode else (255, 255, 255, 255)
-    active_fill = V.GREEN + (255,) if dark_mode else (250, 204, 21, 255)
+    active_fill = V.CORAL + (255,) if dark_mode else (253, 224, 71, 255)
 
     if is_arabic:
+        # Group consecutive Latin runs so embedded English stays left-to-right inside RTL flow
+        visual_groups = []
+        i = 0
+        while i < len(word_boxes):
+            if word_boxes[i][6]:  # is_lat
+                run = []
+                while i < len(word_boxes) and word_boxes[i][6]:
+                    run.append(word_boxes[i])
+                    i += 1
+                visual_groups.append(("ltr", run))
+            else:
+                visual_groups.append(("rtl", [word_boxes[i]]))
+                i += 1
+
         cur_x = start_x + total_w
-        for i, (w_str, disp_str, w_w, w_h) in enumerate(word_boxes):
-            cur_x -= w_w
-            fill_c = active_fill if i == active_word_idx else base_fill
-            y_pos = cy - (4 if i == active_word_idx else 0)
-            d.text((cur_x + 2, y_pos + 4), disp_str, font=font_sub, fill=shadow_col, stroke_width=5, stroke_fill=shadow_col)
-            d.text((cur_x, y_pos), disp_str, font=font_sub, fill=fill_c, stroke_width=4, stroke_fill=stroke_col)
+        for gtype, grp in visual_groups:
+            grp_w = sum(item[3] for item in grp) + spacing * (len(grp) - 1)
+            cur_x -= grp_w
+            if gtype == "ltr":
+                lx = cur_x
+                for orig_i, w_str, disp_str, w_w, w_h, u_font, _ in grp:
+                    fill_c = active_fill if orig_i == active_word_idx else base_fill
+                    y_pos = cy - (3 if orig_i == active_word_idx else 0) + 4
+                    _draw_soft_shadow_text(canvas, (lx, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
+                    lx += w_w + spacing
+            else:
+                orig_i, w_str, disp_str, w_w, w_h, u_font, _ = grp[0]
+                fill_c = active_fill if orig_i == active_word_idx else base_fill
+                y_pos = cy - (3 if orig_i == active_word_idx else 0)
+                _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
             cur_x -= spacing
     else:
         cur_x = start_x
-        for i, (w_str, disp_str, w_w, w_h) in enumerate(word_boxes):
-            fill_c = active_fill if i == active_word_idx else base_fill
-            y_pos = cy - (4 if i == active_word_idx else 0)
-            d.text((cur_x + 2, y_pos + 4), disp_str, font=font_sub, fill=shadow_col, stroke_width=5, stroke_fill=shadow_col)
-            d.text((cur_x, y_pos), disp_str, font=font_sub, fill=fill_c, stroke_width=4, stroke_fill=stroke_col)
+        for orig_i, w_str, disp_str, w_w, w_h, u_font, _ in word_boxes:
+            fill_c = active_fill if orig_i == active_word_idx else base_fill
+            y_pos = cy - (3 if orig_i == active_word_idx else 0)
+            _draw_soft_shadow_text(canvas, (cur_x, y_pos), disp_str, u_font, fill_c, shadow_col, is_light_bg=dark_mode)
             cur_x += w_w + spacing
 
 
@@ -733,7 +889,8 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
         storyboard_data = json.load(f)
 
     cues = storyboard_data.get("storyboard", [])
-    fullscreen_paper_types = {"log_income_curve", "country_comparison"}
+    hook_stamp = (storyboard_data.get("semantic_highlights") or {}).get("hook_stamp")
+    fullscreen_paper_types = {"log_income_curve", "country_comparison", "kasser_dark_side_compare"}
 
     print(f"[render_reel] Pre-baking sprites & academic notebook cutoffs for {Path(cleaned_video).name}...")
     bank = build_sprite_bank(lang=lang)
@@ -774,6 +931,7 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
     f_idx = 0
     t0 = time.time()
     smoothed_head_top = None
+    smoothed_head_cx = None
 
     print(f"[render_reel] Streaming frames at {fps_int}fps ({total_dur:.1f}s)...")
     while True:
@@ -792,10 +950,22 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
                 active_cue = cue
                 break
 
+        # Detect brief adjacent handoff gaps (<=0.6s) between two visual beats so canvas stays paper
+        in_paper_bridge = False
+        if active_cue is None:
+            for c_prev in cues:
+                gap = cur_t - float(c_prev.get("end_time", 0.0))
+                if 0.0 < gap <= 0.65:
+                    for c_next in cues:
+                        if 0.0 <= float(c_next.get("start_time", 0.0)) - cur_t <= 0.65:
+                            in_paper_bridge = True
+                            break
+                    break
+
         btype = (active_cue.get("template") or active_cue.get("animation_type", "")) if active_cue else ""
         is_full_paper = (active_cue is not None) and (btype in fullscreen_paper_types)
 
-        if active_cue is None:
+        if active_cue is None and not in_paper_bridge:
             # State 1: REAL SPEAKER BACKGROUND (hook, pauses between beats, outro)
             raw_im = Image.fromarray(frame_np, "RGB")
             punch = 1.04 if (int(cur_t / 4.5) % 2 == 1) else 1.0
@@ -807,16 +977,30 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
             else:
                 canvas = raw_im.convert("RGBA")
 
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False)
+            if hook_stamp:
+                hst = float(hook_stamp.get("start_time", 1.2))
+                het = float(hook_stamp.get("end_time", 9.0))
+                if hst <= cur_t <= het:
+                    rem_h = het - cur_t
+                    fade_h = ease_out_cubic(min(1.0, rem_h / 0.30)) if rem_h < 0.30 else 1.0
+                    V.draw_hook_stamp(
+                        canvas,
+                        hook_stamp.get("badge", ""),
+                        hook_stamp.get("title", ""),
+                        el=cur_t - hst,
+                        fade_out=fade_h,
+                    )
+
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=1545)
 
         elif is_full_paper:
-            # State 3: Full-Screen Paper Infographics (Beat 3 & Beat 5)
+            # State 3: Full-Screen Paper Infographics (2-Column Compare / Parallel Graphs)
             canvas = paper_base.copy()
             render_beat_graphics(canvas, active_cue, cur_t, bank)
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=True)
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=True, cy_override=1565)
 
         else:
-            # State 2: Lowered Cutout Speaker on Paper + Objects & Notebook Cutoff Above
+            # State 2: 3D Pop-Out Speaker Card on Editorial Paper + Graphics Stage Above
             canvas = paper_base.copy()
 
             mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_np)
@@ -826,32 +1010,55 @@ def render_reel_video(cleaned_video, transcript_json, storyboard_json, output_mp
                 m = 1.0 - m
 
             rows = np.where((m > 0.5).sum(axis=1) > 40)[0]
-            cur_ht = int(rows[0]) if len(rows) else 220
+            cur_ht = int(rows[0]) if len(rows) else 320
+            # Center-of-mass inside central face band so raised outer hands never skew head centroid
+            face_roi = (m[max(0, cur_ht + 40):min(1920, cur_ht + 340), 260:820] > 0.5).astype(np.float32)
+            col_weights = face_roi.sum(axis=0)
+            total_w = float(col_weights.sum())
+            if total_w > 50.0:
+                xs = np.arange(260, 820, dtype=np.float32)
+                cur_cx = float((xs * col_weights).sum() / total_w)
+            else:
+                cur_cx = 540.0
+
             if smoothed_head_top is None:
                 smoothed_head_top = float(cur_ht)
+                smoothed_head_cx = float(cur_cx)
             else:
-                smoothed_head_top = 0.92 * smoothed_head_top + 0.08 * cur_ht
+                smoothed_head_top = 0.90 * smoothed_head_top + 0.10 * cur_ht
+                smoothed_head_cx = 0.90 * smoothed_head_cx + 0.10 * cur_cx
 
-            cut_rgba = fast_cutout_rgba(frame_np, m)
-
-            st = float(active_cue.get("start_time", 0.0))
-            et = float(active_cue.get("end_time", st + 8.0))
-            p_in = ease_out_cubic(min(1.0, (cur_t - st) / 0.28))
-            p_out = ease_out_cubic(min(1.0, (et - cur_t) / 0.28))
-            lower_p = min(p_in, p_out)
-
-            sc = 1.0 - 0.10 * lower_p
-            target_y = int((800 - int(smoothed_head_top * 0.90)) * lower_p)
-            im_spk = cut_rgba.resize((int(1080 * sc), int(1920 * sc)), Image.BILINEAR)
-            sx = (1080 - im_spk.width) // 2
+            if active_cue is None:
+                lower_p = 1.0
+            else:
+                st = float(active_cue.get("start_time", 0.0))
+                et = float(active_cue.get("end_time", st + 8.0))
+                has_prev = any(c is not active_cue and 0.0 <= st - float(c.get("end_time", 0.0)) <= 0.65 for c in cues)
+                has_next = any(c is not active_cue and 0.0 <= float(c.get("start_time", 0.0)) - et <= 0.65 for c in cues)
+                p_in = 1.0 if has_prev else ease_out_cubic(min(1.0, (cur_t - st) / 0.28))
+                p_out = 1.0 if has_next else ease_out_cubic(min(1.0, (et - cur_t) / 0.28))
+                lower_p = min(p_in, p_out)
 
             if lower_p < 0.98:
                 raw_im = Image.fromarray(frame_np, "RGB").convert("RGBA")
                 canvas = Image.blend(raw_im, canvas, lower_p)
 
-            canvas.alpha_composite(im_spk, (sx, target_y))
-            render_beat_graphics(canvas, active_cue, cur_t, bank)
-            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False)
+            V.composite_popout_speaker_card(
+                canvas,
+                frame_np,
+                m,
+                smoothed_head_top=smoothed_head_top,
+                smoothed_head_cx=smoothed_head_cx,
+                lower_p=lower_p,
+                card_rect=(190, 1155, 700, 575),
+                target_head_top_y=855,
+                card_scale=0.72,
+                radius=30,
+            )
+            if active_cue is not None:
+                render_beat_graphics(canvas, active_cue, cur_t, bank)
+            sub_y = int(round(1545 + (1505 - 1545) * lower_p))
+            draw_active_subtitle(canvas, sub_chunks, cur_t, is_arabic, font_sub, dark_mode=False, cy_override=sub_y)
 
         out_proc.stdin.write(canvas.convert("RGB").tobytes())
         f_idx += 1

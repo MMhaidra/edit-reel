@@ -29,37 +29,27 @@ The pipeline supports educational, scientific, academic, macroeconomic, business
 Unless `--design glass` is explicitly requested, every pipeline run defaults to (`--design paper`), using an authentic, tactile physical-object visual language:
 
 ### 1. 3-State Alternating Dynamic Rhythm
-- **State 1 — Real Studio Footage (Camera A/B)**:
+- **State 1 — Real Studio Footage + Typographic Hook Stamp**:
   - Preserves the speaker's authentic camera background during conversational delivery:
-    - Opening hook (first 5–7 seconds).
-    - Natural thought transitions and pauses between visual concepts.
+    - Opening hook (first 5–12 seconds) with optional minimal editorial header stamp above the head.
+    - Natural thought transitions and breathers between visual concepts.
     - Final takeaway and outro.
   - Alternates subtle `1.04x` punch-in camera zooms on alternating sentences for viral eye-tracking retention.
-  - Subtitles float over the lower chest with a soft dark shadow for maximum legibility.
-- **State 2 — Lowered Cutout Speaker on Paper (`y ~ 800..1920`) + Physical Objects Above**:
-  - Automatically activated only while an animation or graphic is actively illustrating the point.
-  - MediaPipe AI person segmentation (`selfie_segmenter.tflite` + Gaussian smoothstep alpha cleanup) cleanly isolates the speaker and places them standing directly on the warm, grainy paper canvas (`#E2DDD1`).
-  - The upper half (`y = 0..900`) displays tangible physical objects and academic notebook cutoffs.
-- **State 3 — Full-Screen Paper Infographics (No Speaker)**:
-  - Takes over the entire canvas for deep conceptual breakdowns:
-    - Side-by-side parallel coordinate charts (e.g. Linear Myth vs. Logarithmic Reality).
-    - Global multi-entity comparisons (e.g. Country rankings, metric distributions).
+  - Mixed-script captions (`Arial Bold` Arabic + left-to-right `Helvetica Neue` English runs) float cleanly with soft Gaussian drop shadow.
+- **State 2 — 3D Pop-Out Speaker Card on Warm Alabaster Paper (`#F3F0E8`) + Editorial Infographics Above**:
+  - Frames the speaker's torso and hand gestures cleanly inside an elevated rounded studio card (`190..890, 1155..1730`, zero chopped wrists or floating hand artifacts) while MediaPipe connected-head segmentation pops the speaker's head smoothly out above the card's top border.
+  - Keeps subtle left/right (`190px`) and bottom (`190px`) buffers completely clear of native Reels UI buttons.
+  - The upper stage (`y = 156..835`) displays micro-provenance academic eyebrow headers, tactile layered stacks, progressive blush-highlighted Georgia Serif archival excerpts, horizontal benchmark bar charts, label-switch sliders, or paper/notebook objects.
+- **State 3 — Full-Canvas Editorial Infographics (No Speaker)**:
+  - Takes over the entire `#F3F0E8` canvas for deep conceptual breakdowns:
+    - Side-by-side 2-column contrast layouts (deep charcoal `#141412` vs stacked sand/blush columns).
+    - Side-by-side parallel coordinate charts (e.g. Linear Myth vs. Logarithmic Reality) and global comparisons.
 
-### 2. Tangible Physical Objects (Zero Generic Web-Cards)
-- **Hanging Price Tags on Strings**:
-  - Cream tags with angled corners, inner stroke border, and gold metal eyelet hanging from a string.
-  - Natural pendulum micro-sway upon entry.
-  - Dynamic Loading Numbers: Numerical milestones animate as rolling odometer counters.
-- **3D Coin Stacks & Dimensional Arrows**:
-  - Multi-tier gold coin stacks with rim bevels.
-  - Directional green (`#00704A`) up-arrows and red (`#BA1828`) down-arrows.
-- **Academic Notebook Cutoffs**:
-  - Pinned authentic torn notebook slips with faint ruled blue-gray lines (`#CBD5E1`), red vertical margin line (`#F87171`), torn bottom edge, and semi-transparent top Scotch tape.
-  - Positioned lower down (`y = 165` on speaker scenes, `y = 210` on full-screen scenes) to ensure a comfortable buffer below mobile status bars, front cameras, and native interface icons.
-  - Typeset in typewriter slab serif (`American Typewriter` / `Courier`) to display peer-reviewed papers.
-- **Clean Visual Accents**:
-  - Rounded white label chips (`border-radius: 18px`) with high-res vector icons.
-  - Clean ink lines drawn directly onto the paper canvas.
+### 2. Editorial & Tactile Visual Components (`motion_library/paper_objects.py`)
+- **Micro-Provenance Citations & Academic Notebook Cutoffs**: Single-line editorial citations pinned safely at `y=156` alongside classic torn ruled notebook slips with faint blue-gray rules and Scotch tape.
+- **Layered Stack Plates & Callouts**: Staggered tactile plates with strikethrough and terracotta coral (`#CC5A43`) focal transitions.
+- **Archival Serif Quote Sheets**: Off-white Georgia Serif document pages with acoustic-synced coral-blush (`#E8C6BC`) highlighter sweeps.
+- **Benchmark Charts, Sliders & Physical Objects**: Horizontal bar charts with dashed reference lines, horizontal label-switch sliders, hanging cream tags on strings with gold eyelets, 3D coin stacks, and dimensional arrows.
 
 ---
 

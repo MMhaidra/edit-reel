@@ -169,6 +169,43 @@ def get_synced_sfx_schedule_for_cue(cue):
             (round(dur * 0.333, 2), "paper_turn.wav", 0.044),
             (round(dur * 0.667, 2), "clean_pop.wav", 0.040),
         ]
+    if template in ["marcuse_false_needs"]:
+        tr = cue.get("triggers") or {}
+        return [
+            (0.00, "subtle_whoosh.wav", 0.036),
+            (round(float(tr.get("strike_at", 4.8)), 2), "tech_tick.wav", 0.038),
+            (round(float(tr.get("highlight_at", 9.0)), 2), "paper_turn.wav", 0.044),
+        ]
+    if template in ["marcuse_quote_excerpt"]:
+        hl = cue.get("highlights") or []
+        st = float(cue.get("start_time", 0.0))
+        events = [(0.00, "paper_turn.wav", 0.042)]
+        for item in hl[:3]:
+            if len(item) >= 2:
+                events.append((max(0.2, round(float(item[1]) - st, 2)), "tech_tick.wav", 0.036))
+        return events
+    if template in ["brickman_hedonic_treadmill"]:
+        return [
+            (0.00, "subtle_whoosh.wav", 0.036),
+            (6.20, "clean_pop.wav", 0.040),
+            (9.80, "tech_tick.wav", 0.040),
+        ]
+    if template in ["kasser_ryan_dark_side", "kasser_dark_side_compare"]:
+        return [
+            (0.00, "subtle_whoosh.wav", 0.036),
+            (0.55, "paper_turn.wav", 0.042),
+            (3.20, "tech_tick.wav", 0.038),
+        ]
+    if template in ["bauer_cuing_consumerism"]:
+        tr = cue.get("triggers") or {}
+        st = float(cue.get("start_time", 0.0))
+        slide_off = max(1.0, round(float(tr.get("slide_t", st + 5.5)) - st, 2))
+        bars_off = max(2.0, round(float(tr.get("bars_t", st + 10.5)) - st, 2))
+        return [
+            (0.00, "subtle_whoosh.wav", 0.036),
+            (slide_off, "tech_tick.wav", 0.042),
+            (bars_off, "clean_pop.wav", 0.040),
+        ]
     return [
         (0.00, "subtle_whoosh.wav", 0.038),
         (0.35, "paper_turn.wav", 0.044),

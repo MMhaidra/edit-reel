@@ -210,20 +210,63 @@ def build_unemployment_storyboard(all_words, total_duration, lang="en"):
 def build_false_needs_storyboard(all_words, total_duration, lang="en"):
     """
     Builds an acoustic-word-locked Beat Map for Herbert Marcuse's 'False Needs' & Consumerism
-    (English & Moroccan Darija) with State 2 'Paper & Objects' aesthetic.
+    (English & Moroccan Darija) combining Paper & Objects with layered editorial storytelling:
+    State 1 Hook Stamp -> Beat 1 Layered Stack -> Beat 2 Highlighted Book Excerpt ->
+    Beat 3 Treadmill Curve + Slider -> Beat 4A Empirical Bars -> Beat 4B Full-Canvas Compare ->
+    Beat 5 Label-Switch Slider & Impact Bars.
     """
     if lang in ["ary", "darija", "moroccan"]:
-        t_marcuse = find_word_timestamp(all_words, ["ماركوز", "البعد الواحد", "الاحتياجات المزيفة", "الطوموبيل"], 13.0, min_t=8.0)
-        t_brickman = find_word_timestamp(all_words, ["بريكمان", "دولاب التعود", "1978", "التعود المادي"], 36.0, min_t=t_marcuse + 10.0)
-        t_kasser = find_word_timestamp(all_words, ["تيم كاسر", "كاسر", "الجانب المظلم", "الحلم الأمريكي"], 56.0, min_t=t_brickman + 10.0)
-        t_bauer = find_word_timestamp(all_words, ["مونيكا باور", "باور", "مستهلك", "العلوم النفسية"], 78.0, min_t=t_kasser + 10.0)
-        t_outro = find_word_timestamp(all_words, ["ماركوز حذرنا", "كنخسرو الحرية", "قبل ما تجري"], 100.0, min_t=t_bauer + 10.0)
+        t_marcuse = find_word_timestamp(all_words, ["الإنسان ذو البعد الواحد", "البعد الواحد", "ماركوز", "الاحتياجات المزيفة"], 12.7, min_t=9.5)
+        t_no_force = find_word_timestamp(all_words, ["كيحتاج للقوة", "للقوة", "يتحكم فينا"], t_marcuse + 5.0, min_t=t_marcuse + 1.5)
+        t_false_trig = find_word_timestamp(all_words, ["الاحتياجات المزيفة", "رغبات", "مصنوعة"], t_marcuse + 9.5, min_t=t_no_force + 1.0)
+        t_numb_trig = find_word_timestamp(all_words, ["كيبنجونا مؤقتاً", "مؤقتاً", "تنشف طاقتنا"], t_marcuse + 17.5, min_t=t_false_trig + 2.0)
+
+        t_quote = find_word_timestamp(all_words, ["جملة شهيرة", "واحد الجملة", "كيلقاو", "الطوموبيل"], 37.0, min_t=t_marcuse + 18.0)
+        t_car = find_word_timestamp(all_words, ["الطوموبيل"], t_quote + 4.8, min_t=t_quote + 1.5)
+        t_tech = find_word_timestamp(all_words, ["الأجهزة"], t_car + 1.5, min_t=t_car + 0.5)
+        t_home = find_word_timestamp(all_words, ["الدار", "ساكنين"], t_tech + 1.5, min_t=t_tech + 0.5)
+
+        t_brickman = find_word_timestamp(all_words, ["1978", "بريكمان", "دولاب التعود"], 55.6, min_t=t_quote + 14.5)
+        t_spike = find_word_timestamp(all_words, ["أي ربح مالي", "ربح مالي", "حاجة جديدة"], t_brickman + 6.5, min_t=t_brickman + 2.5)
+        t_reset = find_word_timestamp(all_words, ["كتفقد النشوة", "النشوة ديالها", "عادي"], t_spike + 3.0, min_t=t_spike + 1.2)
+
+        t_kasser = find_word_timestamp(all_words, ["1993", "تيم كاسر", "كاسر", "الجانب المظلم"], 74.6, min_t=t_brickman + 13.5)
+        t_kasser_cmp = find_word_timestamp(all_words, ["تربط الهوية", "الهوية والأهداف", "كتربط", "الفلوس والمظاهر"], t_kasser + 11.4, min_t=t_kasser + 9.0)
+        t_anx = find_word_timestamp(all_words, ["القلق"], t_kasser_cmp + 4.0, min_t=t_kasser_cmp + 1.0)
+        t_stress = find_word_timestamp(all_words, ["التوتر"], t_anx + 1.5, min_t=t_anx + 0.4)
+        t_depr = find_word_timestamp(all_words, ["الاكتئاب", "كتي"], t_stress + 1.2, min_t=t_stress + 0.4)
+
+        t_bauer = find_word_timestamp(all_words, ["2012", "مونيكا باور", "باور", "العلوم النفسية"], 101.6, min_t=t_kasser_cmp + 11.5)
+        t_consumer = find_word_timestamp(all_words, ["مستهلك", "يتسمى الإنسان"], t_bauer + 5.8, min_t=t_bauer + 2.5)
+        t_stress_spike = find_word_timestamp(all_words, ["نسبة الستريس", "الستريس", "المقارنة السلبية"], t_consumer + 4.0, min_t=t_consumer + 1.5)
+
+        t_outro = find_word_timestamp(all_words, ["ماركوز حذرنا", "كنخسرو الحرية", "قبل ما تجري"], 118.2, min_t=t_bauer + 12.0)
     else:
-        t_marcuse = find_word_timestamp(all_words, ["marcuse", "one-dimensional", "false needs", "automobile"], 14.0, min_t=9.0)
-        t_brickman = find_word_timestamp(all_words, ["brickman", "hedonic", "treadmill", "1978", "lottery"], 38.0, min_t=t_marcuse + 10.0)
-        t_kasser = find_word_timestamp(all_words, ["kasser", "dark side", "american dream", "1993", "vitality"], 58.0, min_t=t_brickman + 10.0)
-        t_bauer = find_word_timestamp(all_words, ["bauer", "psychological science", "cuing", "consumer", "2012"], 80.0, min_t=t_kasser + 10.0)
-        t_outro = find_word_timestamp(all_words, ["marcuse warned", "lose our freedom", "pause and ask"], 102.0, min_t=t_bauer + 10.0)
+        t_marcuse = find_word_timestamp(all_words, ["one-dimensional", "marcuse", "false needs"], 14.0, min_t=9.5)
+        t_no_force = find_word_timestamp(all_words, ["force", "coercion", "control"], t_marcuse + 4.0, min_t=t_marcuse + 1.5)
+        t_false_trig = find_word_timestamp(all_words, ["false needs", "manufactured"], t_marcuse + 8.0, min_t=t_no_force + 1.0)
+        t_numb_trig = find_word_timestamp(all_words, ["numb", "draining", "work"], t_marcuse + 14.0, min_t=t_false_trig + 2.0)
+
+        t_quote = find_word_timestamp(all_words, ["famous line", "recognize themselves", "soul in their", "automobile"], 36.0, min_t=t_marcuse + 16.0)
+        t_car = find_word_timestamp(all_words, ["automobile"], t_quote + 3.5, min_t=t_quote + 1.0)
+        t_tech = find_word_timestamp(all_words, ["hi-fi", "sound system"], t_car + 1.5, min_t=t_car + 0.4)
+        t_home = find_word_timestamp(all_words, ["split-level", "home"], t_tech + 1.5, min_t=t_tech + 0.4)
+
+        t_brickman = find_word_timestamp(all_words, ["brickman", "hedonic", "treadmill", "1978"], 54.0, min_t=t_quote + 12.0)
+        t_spike = find_word_timestamp(all_words, ["windfall", "upgrade", "rush"], t_brickman + 5.0, min_t=t_brickman + 2.0)
+        t_reset = find_word_timestamp(all_words, ["baseline", "normal", "fades"], t_spike + 3.0, min_t=t_spike + 1.0)
+
+        t_kasser = find_word_timestamp(all_words, ["kasser", "dark side", "american dream", "1993"], 72.0, min_t=t_brickman + 12.0)
+        t_kasser_cmp = find_word_timestamp(all_words, ["identity", "anxiety", "vitality", "depression"], t_kasser + 10.5, min_t=t_kasser + 8.5)
+        t_anx = t_kasser_cmp + 3.0
+        t_stress = t_anx + 1.5
+        t_depr = t_stress + 1.5
+
+        t_bauer = find_word_timestamp(all_words, ["bauer", "psychological science", "cuing", "consumer", "2012"], 96.0, min_t=t_kasser_cmp + 10.5)
+        t_consumer = find_word_timestamp(all_words, ["consumer", "labeled"], t_bauer + 4.5, min_t=t_bauer + 2.0)
+        t_stress_spike = find_word_timestamp(all_words, ["stress", "insecurity", "competitive"], t_consumer + 3.5, min_t=t_consumer + 1.5)
+
+        t_outro = find_word_timestamp(all_words, ["marcuse warned", "lose our freedom", "pause and ask"], 115.0, min_t=t_bauer + 12.0)
 
     cues = [
         {
@@ -233,74 +276,135 @@ def build_false_needs_storyboard(all_words, total_duration, lang="en"):
             "template": "marcuse_false_needs",
             "layout_mode": "split",
             "split_height": 920,
-            "kicker": "HERBERT MARCUSE (1964) • BEACON PRESS",
+            "kicker": "Herbert Marcuse (1964) • One-Dimensional Man • Beacon Press",
             "headline": "Modern society traps us through manufactured desires we mistake for our own.",
             "title": "FALSE NEEDS",
             "badge": "MARCUSE 1964",
+            "triggers": {
+                "strike_at": round(t_no_force - t_marcuse, 2),
+                "highlight_at": round(t_false_trig - t_marcuse, 2),
+                "badge_at": round(t_numb_trig - t_marcuse, 2),
+            },
             "citation": {
                 "journal": "BEACON PRESS • BOSTON (1964)",
                 "title": "One-Dimensional Man: Studies in the Ideology of Advanced Industrial Society",
                 "authors": "Herbert Marcuse (Chapter 1: The New Forms of Control)"
             },
             "start_time": t_marcuse,
-            "end_time": max(t_marcuse + 15.0, t_brickman - 1.2)
+            "end_time": round(max(t_marcuse + 16.0, t_quote - 0.15), 2)
         },
         {
             "beat_id": 2,
+            "idea": "Marcuse Quote: People Find Their Soul in Commodities",
+            "domain": "marcuse_quote_excerpt",
+            "template": "marcuse_quote_excerpt",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "One-Dimensional Man (1964) • Ch. 1: New Forms of Control",
+            "headline": "People recognize themselves in commodities: automobile, hi-fi set, split-level home.",
+            "title": "MARCUSE EXCERPT",
+            "badge": "CH. 1 QUOTE",
+            "highlights": [
+                ["automobile", t_car],
+                ["hi-fi set", t_tech],
+                ["split-level home", t_home]
+            ],
+            "citation": {
+                "journal": "BEACON PRESS • CHAPTER 1 (P. 9)",
+                "title": "The people recognize themselves in their commodities",
+                "authors": "Herbert Marcuse (1964)"
+            },
+            "start_time": t_quote,
+            "end_time": round(min(t_brickman - 2.6, max(t_quote + 12.0, t_home + 5.8)), 2)
+        },
+        {
+            "beat_id": 3,
             "idea": "Philip Brickman (1978): The Hedonic Treadmill & Dopamine Adaptation",
             "domain": "brickman_hedonic_treadmill",
             "template": "brickman_hedonic_treadmill",
             "layout_mode": "split",
             "split_height": 920,
-            "kicker": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY (1978)",
+            "kicker": "Philip Brickman et al. (1978) • J. Personality & Social Psychology",
             "headline": "Financial windfalls lose their emotional rush, forcing an endless upgrade loop.",
             "title": "HEDONIC TREADMILL",
             "badge": "BRICKMAN 1978",
+            "triggers": {
+                "spike_t": t_spike,
+                "reset_t": t_reset,
+            },
             "citation": {
                 "journal": "J. PERSONALITY & SOCIAL PSYCHOLOGY (VOL. 36, NO. 8, PP. 917–927)",
                 "title": "Lottery winners and accident victims: Is happiness relative?",
                 "authors": "Philip Brickman, Dan Coates & Ronnie Janoff-Bulman (1978)"
             },
             "start_time": t_brickman,
-            "end_time": max(t_brickman + 15.0, t_kasser - 1.2)
+            "end_time": round(max(t_brickman + 15.0, t_kasser - 1.5), 2)
         },
         {
-            "beat_id": 3,
-            "idea": "Kasser & Ryan (1993): A Dark Side of the American Dream",
+            "beat_id": 4,
+            "idea": "Kasser & Ryan (1993): Empirical Correlates of Financial Aspiration",
             "domain": "kasser_ryan_dark_side",
             "template": "kasser_ryan_dark_side",
             "layout_mode": "split",
             "split_height": 920,
-            "kicker": "JOURNAL OF PERSONALITY AND SOCIAL PSYCHOLOGY (1993)",
-            "headline": "Prioritizing material wealth rewires the brain for anxiety and depression.",
-            "title": "DARK SIDE OF WEALTH",
-            "badge": "KASSER & RYAN 1993",
+            "kicker": "Tim Kasser & Richard Ryan (1993) • J. Personality & Social Psychology",
+            "headline": "Extrinsic money-first goals predict higher anxiety & depression than intrinsic goals.",
+            "title": "DARK SIDE STUDY",
+            "badge": "KASSER 1993",
             "citation": {
                 "journal": "J. PERSONALITY & SOCIAL PSYCHOLOGY (VOL. 65, NO. 2, PP. 410–422)",
                 "title": "A dark side of the American dream: Correlates of financial success",
                 "authors": "Tim Kasser & Richard M. Ryan (1993)"
             },
             "start_time": t_kasser,
-            "end_time": max(t_kasser + 15.0, t_bauer - 1.2)
+            "end_time": round(max(t_kasser + 10.5, t_kasser_cmp - 0.15), 2)
         },
         {
-            "beat_id": 4,
+            "beat_id": 5,
+            "idea": "Kasser & Ryan (1993): Wealth Trap vs Well-Being Contrast",
+            "domain": "kasser_dark_side_compare",
+            "template": "kasser_dark_side_compare",
+            "layout_mode": "fullscreen",
+            "split_height": 0,
+            "kicker": "Kasser & Ryan (1993) • Correlates of Financial Aspiration",
+            "headline": "Even high earners suffer chronic stress, anxiety, and lower vitality when wealth defines identity.",
+            "title": "WEALTH VS VITALITY",
+            "badge": "PSYCHOLOGICAL TOLL",
+            "triggers": {
+                "anx_at": round(max(0.8, t_anx - t_kasser_cmp), 2),
+                "stress_at": round(max(2.2, t_stress - t_kasser_cmp), 2),
+                "depr_at": round(max(3.6, t_depr - t_kasser_cmp), 2),
+            },
+            "citation": {
+                "journal": "J. PERSONALITY & SOCIAL PSYCHOLOGY (1993)",
+                "title": "Financial Success Centrality vs Psychological Vitality",
+                "authors": "Tim Kasser & Richard M. Ryan"
+            },
+            "start_time": t_kasser_cmp,
+            "end_time": round(min(t_bauer - 2.2, max(t_kasser_cmp + 10.5, t_depr + 2.6)), 2)
+        },
+        {
+            "beat_id": 6,
             "idea": "Bauer et al. (2012): Cuing Consumerism & Societal Dissatisfaction",
             "domain": "bauer_cuing_consumerism",
             "template": "bauer_cuing_consumerism",
             "layout_mode": "split",
             "split_height": 920,
-            "kicker": "PSYCHOLOGICAL SCIENCE (BAUER ET AL. 2012)",
-            "headline": "Labeling someone a consumer immediately spikes insecurity and competitiveness.",
+            "kicker": "Monika A. Bauer et al. (2012) • Psychological Science (Vol. 23)",
+            "headline": "Labeling someone a consumer immediately spikes stress, insecurity & comparison.",
             "title": "INDIVIDUAL → CONSUMER",
             "badge": "BAUER 2012",
+            "triggers": {
+                "slide_t": t_consumer,
+                "bars_t": t_stress_spike,
+            },
             "citation": {
                 "journal": "PSYCHOLOGICAL SCIENCE (VOL. 23, NO. 5, PP. 517–523)",
                 "title": "Cuing Consumerism: Situational Materialism Undermines Well-Being",
                 "authors": "Monika A. Bauer, James E. B. Wilkie, Jung K. Kim & Galen V. Bodenhausen"
             },
             "start_time": t_bauer,
-            "end_time": max(t_bauer + 15.0, t_outro - 0.8)
+            "end_time": round(max(t_bauer + 14.5, t_outro - 0.3), 2)
         }
     ]
 
@@ -308,16 +412,14 @@ def build_false_needs_storyboard(all_words, total_duration, lang="en"):
     safe_end_limit = max(10.0, total_duration - 4.5)
     for c in cues:
         st = round(max(2.6, float(c["start_time"])), 2)
-        if valid_cues and st < valid_cues[-1]["end_time"] + 1.1:
-            st = round(valid_cues[-1]["end_time"] + 1.1, 2)
+        if valid_cues and st <= valid_cues[-1]["end_time"] + 0.12:
+            st = round(valid_cues[-1]["end_time"] + 0.15, 2)
         raw_en = float(c["end_time"])
-        en = round(min(safe_end_limit, min(st + 16.0, max(st + 6.0, raw_en))), 2)
-        if en - st >= 4.5 and st < safe_end_limit - 3.5:
+        en = round(min(safe_end_limit, min(st + 25.0, max(st + 6.0, raw_en))), 2)
+        if en - st >= 5.2 and st < safe_end_limit - 3.5:
             c["start_time"] = st
             c["end_time"] = en
             c["duration"] = round(en - st, 2)
-            c["layout_mode"] = "split"
-            c["split_height"] = 920
             c["animation_type"] = c["template"]
             c["custom_render"] = True
             valid_cues.append(c)
@@ -631,6 +733,15 @@ def plan_storyboard(transcript_data, lang="en", use_ai=True):
     if is_false_needs:
         print(f"[storyboard_planner] Planning Step 2 Beat Map for Herbert Marcuse & False Needs ({lang})!")
         cues = build_false_needs_storyboard(all_words, total_duration, lang=lang)
+        t_hook_st = find_word_timestamp(all_words, ["1964", "فيلسوف", "philosopher"], 1.3, min_t=0.5)
+        semantic_highlights = {
+            "hook_stamp": {
+                "badge": "1964  •  PHILOSOPHY + PSYCHOLOGY",
+                "title": "HERBERT MARCUSE",
+                "start_time": round(t_hook_st, 2),
+                "end_time": round(min(cues[0]["start_time"] - 1.0, t_hook_st + 8.5), 2) if cues else 9.0,
+            }
+        }
         if lang in ["ary", "darija", "moroccan"]:
             post_metadata = {
                 "post_title": "علاش كتبقى ديما مزير وعياّن واخا الصالير كيزيد؟ (هربرت ماركوز ودولاب التعود المادي)",
