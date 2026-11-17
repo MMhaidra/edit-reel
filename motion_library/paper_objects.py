@@ -1180,3 +1180,110 @@ def composite_popout_speaker_card(
             head_im = Image.fromarray(np.dstack([head_rgb, head_alpha]), "RGBA")
             canvas.alpha_composite(head_im, (sx + s_x0, sy + s_y0))
 
+
+def draw_editorial_trend_curve(
+    canvas,
+    title_text,
+    bench_label,
+    start_label,
+    end_label,
+    norm_points,
+    metric_big,
+    metric_sub,
+    el,
+    curve_color=CORAL,
+    bench_norm_y=0.15,
+    fade_out=1.0,
+):
+    """
+    Draws an animated macro-index trend chart on the warm alabaster stage (y=214..755)
+    with a dashed reference line, progressive ink curve (0.0=bottom .. 1.0=top norm y),
+    endpoint dot, and floating corner metric badge.
+    """
+    p_in = _ease_out_cubic(min(1.0, el / 0.40))
+    op = min(1.0, p_in * 1.5) * fade_out
+    if op <= 0.02:
+        return
+
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+
+    f_title = ed_sans(31, weight="bold")
+    f_sub = ed_sans(23, weight="medium")
+    f_big = ed_sans(56, weight="black")
+    f_bsub = ed_sans(22, weight="bold")
+
+    d.text((76, 212), title_text, font=f_title, fill=INK + (int(255 * op),))
+
+    # Plot bounds inside upper stage leaving >=115px clearance above pop-out head (y=855)
+    x0, x1 = 92, W - 92
+    y_top, y_bot = 315, 655
+    plot_h = y_bot - y_top
+
+    # Clean light card backing
+    d.rounded_rectangle(
+        [72, 265, W - 72, 725],
+        radius=18,
+        fill=(250, 248, 243, int(235 * op)),
+        outline=(214, 208, 196, int(210 * op)),
+        width=2,
+    )
+
+    # Horizontal dashed benchmark line
+    by = int(y_bot - bench_norm_y * plot_h)
+    for dx in range(x0, x1, 20):
+        d.line([(dx, by), (min(dx + 10, x1), by)], fill=INK_SOFT + (int(195 * op),), width=3)
+    b_lbl_y = by - 28 if bench_norm_y >= 0.72 else by + 10
+    d.text((x0 + 8, b_lbl_y), bench_label, font=f_sub, fill=INK_SOFT + (int(230 * op),))
+
+    # Interpolate smooth polyline from norm_points
+    curve_p = _ease_out_cubic(min(1.0, max(0.0, (el - 0.30) / 1.8)))
+    if curve_p > 0.02 and len(norm_points) >= 2:
+        n_steps = 80
+        max_k = max(2, int(n_steps * curve_p))
+        pts = []
+        seg_n = len(norm_points) - 1
+        for k in range(max_k):
+            u = k / float(n_steps - 1)
+            pos = u * seg_n
+            idx = min(seg_n - 1, int(math.floor(pos)))
+            frac = pos - idx
+            yn = norm_points[idx] + (norm_points[idx + 1] - norm_points[idx]) * frac
+            px = x0 + 24 + u * (x1 - x0 - 48)
+            py = y_bot - yn * plot_h
+            pts.append((px, py))
+        ink_line(overlay, pts, curve_color, 9)
+        ex, ey = pts[-1]
+        d.ellipse([ex - 11, ey - 11, ex + 11, ey + 11], fill=(255, 255, 255, int(255 * op)), outline=curve_color + (int(255 * op),), width=5)
+
+    # X-axis start/end labels inside bottom of card
+    d.text((x0 + 16, y_bot + 18), start_label, font=f_sub, fill=INK_SOFT + (int(230 * op),))
+    bbe = d.textbbox((0, 0), end_label, font=f_sub)
+    d.text((x1 - 16 - (bbe[2] - bbe[0]), y_bot + 18), end_label, font=f_sub, fill=INK + (int(240 * op),))
+
+    # Metric callout card in opposite quadrant to endpoint
+    if el >= 0.9:
+        mp_t = _ease_out_back(min(1.0, (el - 0.9) / 0.42)) * op
+        bbm = d.textbbox((0, 0), metric_big, font=f_big)
+        bbs = d.textbbox((0, 0), metric_sub, font=f_bsub)
+        mw = max(bbm[2] - bbm[0], bbs[2] - bbs[0]) + 64
+        bx0 = (x1 - mw - 18) if norm_points[-1] < 0.5 else (x0 + 18)
+        is_low_end = norm_points[-1] < 0.5
+        by0 = 300 if is_low_end else 325
+        # Keep badge opposite endpoint Y when endpoint finishes low vs high
+        if norm_points[-1] >= 0.5:
+            bx0 = x0 + 24
+            by0 = 305
+        else:
+            bx0 = x1 - mw - 24
+            by0 = 335
+        d.rounded_rectangle(
+            [bx0, by0, bx0 + mw, by0 + 112],
+            radius=16,
+            fill=CHARCOAL + (int(244 * mp_t),),
+        )
+        _center_text(d, bx0 + mw // 2, by0 + 42, metric_big, f_big, (255, 255, 255, int(255 * mp_t)))
+        _center_text(d, bx0 + mw // 2, by0 + 88, metric_sub, f_bsub, BLUSH + (int(255 * mp_t),))
+
+    canvas.alpha_composite(overlay)
+

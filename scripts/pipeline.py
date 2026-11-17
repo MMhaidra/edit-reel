@@ -190,6 +190,12 @@ def get_synced_sfx_schedule_for_cue(cue):
             (6.20, "clean_pop.wav", 0.040),
             (9.80, "tech_tick.wav", 0.040),
         ]
+    if template in ["token_price_crash", "gpu_rental_surge"]:
+        return [
+            (0.00, "subtle_whoosh.wav", 0.036),
+            (0.65, "tech_tick.wav", 0.042),
+            (1.65, "clean_pop.wav", 0.040),
+        ]
     if template in ["kasser_ryan_dark_side", "kasser_dark_side_compare", "benchmark_bars", "two_col_compare"]:
         return [
             (0.00, "subtle_whoosh.wav", 0.036),
@@ -449,7 +455,9 @@ REEL_FRIENDLY_NAMES = {
     "E8AE11A3-4062-4691-AF49-DD69AC94FBF9": "Reel_1_The_Hidden_Unemployment_Crisis_EN.mp4",
     "8D33DF6D-7C1A-4784-B8E4-3B7D0A5CFAC4": "Reel_2_The_Hidden_Unemployment_Crisis_Darija.mp4",
     "DAA97F19-F02A-40FB-B7D2-8BF87A59FDD9": "Reel_3_Herbert_Marcuse_False_Needs_EN.mp4",
-    "F189A3EA-73AF-4BED-A71F-C14272E9D58E": "Reel_4_Herbert_Marcuse_False_Needs_Darija.mp4"
+    "F189A3EA-73AF-4BED-A71F-C14272E9D58E": "Reel_4_Herbert_Marcuse_False_Needs_Darija.mp4",
+    "A517CFD4-173F-40A8-94A0-FD0925EBDA83": "Reel_5_Tokenomics_2_0_Jevons_Paradox_EN.mp4",
+    "D4CCC889-C58C-46DA-9E7B-8535E2421634": "Reel_6_Tokenomics_2_0_Jevons_Paradox_Darija.mp4"
 }
 
 

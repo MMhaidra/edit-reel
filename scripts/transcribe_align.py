@@ -383,15 +383,79 @@ def force_align_script_to_acoustic_words(script_text, acoustic_words, language="
         aligned_pairs.reverse()
 
         aligned_words = []
-        for a_idx, s_idx in aligned_pairs:
+        p_idx = 0
+        while p_idx < len(aligned_pairs):
+            a_idx, s_idx = aligned_pairs[p_idx]
             if a_idx is not None:
                 ac_w = acoustic_words[a_idx]
-                chosen_word = script_tokens[s_idx] if (s_idx is not None) else ac_w["word"]
-                aligned_words.append({
-                    "word": chosen_word,
-                    "start": ac_w["start"],
-                    "end": ac_w["end"]
-                })
+                if s_idx is not None:
+                    aligned_words.append({
+                        "word": script_tokens[s_idx],
+                        "start": ac_w["start"],
+                        "end": ac_w["end"],
+                        "_from_script": True,
+                    })
+                else:
+                    # Drop orphan punctuation or partial hyphen/prefix duplicates, extending neighbor timing
+                    raw_tok = ac_w["word"].strip()
+                    norm_raw = normalize_token(raw_tok, language)
+                    if aligned_words:
+                        aligned_words[-1]["end"] = max(aligned_words[-1]["end"], ac_w["end"])
+                    is_punc_only = not re.search(r"[\w\u0600-\u06FF]", raw_tok)
+                    if not is_punc_only and language not in ["ary", "darija", "moroccan"]:
+                        prev_norm = normalize_token(aligned_words[-1]["word"], language) if aligned_words else ""
+                        next_tok = ""
+                        if p_idx + 1 < len(aligned_pairs) and aligned_pairs[p_idx + 1][1] is not None:
+                            next_tok = script_tokens[aligned_pairs[p_idx + 1][1]].lower()
+                        if norm_raw and norm_raw not in prev_norm and norm_raw not in next_tok:
+                            aligned_words.append({
+                                "word": raw_tok,
+                                "start": ac_w["start"],
+                                "end": ac_w["end"],
+                                "_from_script": False,
+                            })
+                p_idx += 1
+            else:
+                # Short trace==3 run: Whisper merged adjacent words/numbers (e.g. 'بـ 62%', 'مية'); keep monotonically synced
+                run_s = []
+                while p_idx < len(aligned_pairs) and aligned_pairs[p_idx][0] is None:
+                    if aligned_pairs[p_idx][1] is not None:
+                        run_s.append(script_tokens[aligned_pairs[p_idx][1]])
+                    p_idx += 1
+                if 1 <= len(run_s) <= 4:
+                    t_left = aligned_words[-1]["end"] if aligned_words else 0.0
+                    # Look ahead for next acoustic start
+                    t_right = duration
+                    for k_look in range(p_idx, len(aligned_pairs)):
+                        if aligned_pairs[k_look][0] is not None:
+                            t_right = acoustic_words[aligned_pairs[k_look][0]]["start"]
+                            break
+                    # Only interpolate inside local speech windows (<= 2.2s gap)
+                    if t_right - t_left <= 2.2:
+                        # Steal a small slice if t_right <= t_left
+                        if t_right <= t_left + 0.08 and aligned_words:
+                            span_total = max(0.18, aligned_words[-1]["end"] - aligned_words[-1]["start"])
+                            split_t = round(aligned_words[-1]["start"] + span_total * 0.45, 3)
+                            aligned_words[-1]["end"] = split_t
+                            t_left = split_t
+                            t_right = max(t_left + 0.08 * len(run_s), t_right)
+                        step = max(0.06, (t_right - t_left) / float(len(run_s)))
+                        for r_i, rw in enumerate(run_s):
+                            ws = round(t_left + r_i * step, 3)
+                            we = round(max(ws + 0.05, t_left + (r_i + 1) * step), 3)
+                            aligned_words.append({"word": rw, "start": ws, "end": we, "_from_script": True})
+
+        # Second cleanup pass: drop stray accidental duplicate words right next to hyphenated script word
+        cleaned_words = []
+        for idx_w, w_obj in enumerate(aligned_words):
+            n_cur = normalize_token(w_obj["word"], language)
+            if not w_obj.get("_from_script", True) and idx_w + 1 < len(aligned_words):
+                if n_cur and n_cur in normalize_token(aligned_words[idx_w + 1]["word"], language):
+                    aligned_words[idx_w + 1]["start"] = min(aligned_words[idx_w + 1]["start"], w_obj["start"])
+                    continue
+            w_obj.pop("_from_script", None)
+            cleaned_words.append(w_obj)
+        aligned_words = cleaned_words
 
     # Group into natural segments by sentence boundaries or audio pauses > 0.45s
     segments = []

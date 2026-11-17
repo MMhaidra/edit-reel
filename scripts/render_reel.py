@@ -625,6 +625,47 @@ def render_beat_graphics(canvas, cue, cur_t, bank):
         slide_raw = max(0.0, min(1.0, (el - 3.5) / max(4.0, dur - 4.5)))
         V.draw_slider_switch_track(canvas, "UPGRADE HIGH", "BACK TO BASELINE", ease_in_out_cubic(slide_raw), y=695, opacity=fade_out)
 
+    elif btype == "token_price_crash":
+        # Citadel Securities Tokenomics 2.0: Descending Price Index Curve (-50% / -62%)
+        kicker = cue.get("kicker") or "Citadel Securities Macro Strategy (Oct 2026)  •  Tokenomics 2.0"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        V.draw_editorial_trend_curve(
+            canvas,
+            title_text=cue.get("title_text") or "AI Token Prices Have Collapsed",
+            bench_label="Apr 2026 Frontier Index (1.00x)",
+            start_label="APR 2026",
+            end_label="OCT 2026",
+            norm_points=[0.84, 0.72, 0.56, 0.42, 0.31, 0.22],
+            metric_big="-62%",
+            metric_sub="-50% WEIGHTED AVG",
+            el=el,
+            curve_color=V.CORAL,
+            bench_norm_y=0.84,
+            fade_out=fade_out,
+        )
+
+    elif btype == "gpu_rental_surge":
+        # Silicon Data & Citadel Securities: B200 GPU Term Rental Surge ($4.20 -> $6.60+/hr)
+        kicker = cue.get("kicker") or "Silicon Data & Citadel Securities  •  B200 GPU Term Rental (2026)"
+        V.draw_provenance_eyebrow(canvas, kicker, opacity=fade_out)
+        val_p = ease_out_cubic(min(1.0, max(0.0, (el - 0.5) / 2.2)))
+        cur_rate = 4.20 + (6.65 - 4.20) * val_p
+        rate_str = f"${cur_rate:.2f}+/HR" if val_p >= 0.95 else f"${cur_rate:.2f}/HR"
+        V.draw_editorial_trend_curve(
+            canvas,
+            title_text=cue.get("title_text") or "B200 GPU Hourly Rental Rate",
+            bench_label="Jan 2026 Baseline ($4.20/hr)",
+            start_label="JAN 2026",
+            end_label="OCT 2026",
+            norm_points=[0.18, 0.24, 0.34, 0.50, 0.72, 0.92],
+            metric_big=rate_str,
+            metric_sub="+57% HARDWARE SURGE",
+            el=el,
+            curve_color=V.SAGE,
+            bench_norm_y=0.18,
+            fade_out=fade_out,
+        )
+
     elif btype in ("kasser_ryan_dark_side", "benchmark_bars"):
         # Horizontal Empirical Comparison Bars against dashed reference baseline
         kicker = cue.get("kicker") or "Tim Kasser & Richard Ryan (1993) • J. Personality & Social Psychology"

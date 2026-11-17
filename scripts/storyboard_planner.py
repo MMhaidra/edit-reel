@@ -684,6 +684,196 @@ def build_money_happiness_storyboard(all_words, total_duration, lang="en"):
     return valid_cues
 
 
+def build_tokenomics_storyboard(all_words, total_duration, lang="en"):
+    """
+    Builds an acoustic-word-locked Beat Map for Citadel Securities 'Tokenomics 2.0' & Jevons Paradox
+    (English & Moroccan Darija) with State 2 Pop-Out Card, Trend Curves, Sliders & State 3 Contrast.
+    """
+    is_ar = lang in ["ary", "darija", "moroccan"]
+    if is_ar:
+        t_crash = find_word_timestamp(all_words, ["سيتاديل", "توكنوميكس", "أكتوبر", "طاح بالنص", "50%"], 16.0, min_t=10.5)
+        t_vercel = find_word_timestamp(all_words, ["روتورات", "الديفلوبورز", "فيرسيل", "الأوبن سورس"], 34.0, min_t=t_crash + 11.0)
+        t_router_trig = find_word_timestamp(all_words, ["روتورات", "أوتوماتيكمون", "الأوبن سورس"], t_vercel + 2.5, min_t=t_vercel + 0.5)
+        t_bars_trig = find_word_timestamp(all_words, ["فيرسيل", "13%", "70%"], t_vercel + 6.0, min_t=t_router_trig + 1.5)
+
+        t_gpu = find_word_timestamp(all_words, ["اللغز", "الشيبس", "بي ميتين", "B200", "ربعة دولار"], 54.0, min_t=t_vercel + 14.0)
+        t_jevons = find_word_timestamp(all_words, ["مفارقة جيفونز", "1865", "ويليام ستانلي", "جيفونز"], 72.0, min_t=t_gpu + 14.0)
+        t_h1 = find_word_timestamp(all_words, ["موطورات البخار", "رخيص", "الفاخر"], t_jevons + 3.5, min_t=t_jevons + 1.5)
+        t_h2 = find_word_timestamp(all_words, ["أضعاف مضاعفة", "ما نقصوش", "مربحين"], t_h1 + 2.5, min_t=t_h1 + 1.0)
+
+        t_cmp = find_word_timestamp(all_words, ["نفس اللوجيك", "الذكاء بوحدو", "سلعة عادية"], 89.0, min_t=t_jevons + 11.5)
+        t_outro = find_word_timestamp(all_words, ["فالكاريير", "عمرك تدخل", "داك القنت"], 108.0, min_t=t_cmp + 9.0)
+    else:
+        t_crash = find_word_timestamp(all_words, ["citadel", "tokenomics", "october 2026", "50%"], 18.0, min_t=11.0)
+        t_vercel = find_word_timestamp(all_words, ["smart routers", "vercel", "open-weight", "developers"], 36.0, min_t=t_crash + 12.0)
+        t_router_trig = find_word_timestamp(all_words, ["smart routers", "open-weight"], t_vercel + 2.0, min_t=t_vercel + 0.5)
+        t_bars_trig = find_word_timestamp(all_words, ["vercel", "13%", "70%"], t_vercel + 5.5, min_t=t_router_trig + 1.5)
+
+        t_gpu = find_word_timestamp(all_words, ["puzzle", "chips", "b200", "hourly", "4.20"], 56.0, min_t=t_vercel + 14.0)
+        t_jevons = find_word_timestamp(all_words, ["jevons", "1865", "coal", "steam engines"], 74.0, min_t=t_gpu + 14.0)
+        t_h1 = find_word_timestamp(all_words, ["efficient", "coal", "cheaper"], t_jevons + 3.0, min_t=t_jevons + 1.2)
+        t_h2 = find_word_timestamp(all_words, ["exponentially", "burn less", "profitable"], t_h1 + 2.5, min_t=t_h1 + 1.0)
+
+        t_cmp = find_word_timestamp(all_words, ["same economic", "low-margin", "commodity", "bottlenecks"], 92.0, min_t=t_jevons + 11.0)
+        t_outro = find_word_timestamp(all_words, ["in your career", "never compete", "position yourself"], 112.0, min_t=t_cmp + 9.5)
+
+    cues = [
+        {
+            "beat_id": 1,
+            "idea": "Citadel Tokenomics 2.0: Token Prices Collapsed -50% to -62%",
+            "domain": "token_price_crash",
+            "template": "token_price_crash",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "Citadel Securities Macro Strategy (Oct 2026)  •  Tokenomics 2.0",
+            "headline": "Weighted AI token prices dropped 50% while frontier prices plunged 62% in 6 months.",
+            "title": "AI TOKEN CRASH",
+            "title_text": "AI Token Prices Collapsed",
+            "badge": "-62% FRONTIER",
+            "citation": {
+                "journal": "CITADEL SECURITIES MACRO STRATEGY (OCT 2026)",
+                "title": "Tokenomics 2.0 (Bloomberg & Silicon Data LLM Token Index)",
+                "authors": "Frank Flight • Citadel Securities Institutional Research"
+            },
+            "start_time": t_crash,
+            "end_time": round(max(t_crash + 14.0, t_vercel - 0.8), 2)
+        },
+        {
+            "beat_id": 2,
+            "idea": "Smart Routers & Open-Weight Surge (Vercel AI Gateway)",
+            "domain": "label_slider",
+            "template": "label_slider",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "Vercel AI Gateway & Citadel Securities  •  Dec 2025 – Sep 2026",
+            "headline": "Open-weight token share jumped from 13% to >70% while taking <25% of dollar spend.",
+            "title": "SMART ROUTER SHIFT",
+            "badge": ">70% VOLUME",
+            "slider_labels": ["FRONTIER MODEL", "SMART ROUTER"],
+            "bench_label": "Dec '25 Base (13%)",
+            "bench_ratio": 0.16,
+            "triggers": {"slide_t": t_router_trig, "bars_t": t_bars_trig},
+            "bars": [
+                {"label": "Dec 2025 Vol", "ratio": 0.18, "val_str": "13%", "muted": True, "accent": False},
+                {"label": "Sep 2026 Vol", "ratio": 0.88, "val_str": ">70%", "muted": False, "accent": True},
+                {"label": "Dollar Spend", "ratio": 0.30, "val_str": "<25%", "muted": False, "accent": False},
+            ],
+            "citation": {
+                "journal": "VERCEL AI GATEWAY & CITADEL SECURITIES (SEP 2026)",
+                "title": "Open Weight Token Volume % vs Open Weight Token Spend %",
+                "authors": "Vercel Production Telemetry • Citadel Tokenomics 2.0"
+            },
+            "start_time": t_vercel,
+            "end_time": round(max(t_vercel + 15.0, t_gpu - 1.2), 2)
+        },
+        {
+            "beat_id": 3,
+            "idea": "The Hardware Bottleneck: B200 GPU Rental Surge ($4.20 to $6.60+/hr)",
+            "domain": "gpu_rental_surge",
+            "template": "gpu_rental_surge",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "Silicon Data & Citadel Securities  •  B200 GPU Rental History (2026)",
+            "headline": "While token prices fell 62%, B200 GPU term rental rates jumped from $4.20 to $6.60+/hr.",
+            "title": "GPU RENTAL SURGE",
+            "title_text": "B200 GPU Hourly Rental Rate",
+            "badge": "$6.60+/HR",
+            "citation": {
+                "journal": "SILICON DATA & CITADEL SECURITIES (JAN – OCT 2026)",
+                "title": "Silicon Data B200 GPU Term Rental Rate History ($/hr)",
+                "authors": "Hardware Compute Scarcity Index"
+            },
+            "start_time": t_gpu,
+            "end_time": round(max(t_gpu + 14.0, t_jevons - 1.2), 2)
+        },
+        {
+            "beat_id": 4,
+            "idea": "William Stanley Jevons (1865): The Coal Question & Jevons Paradox",
+            "domain": "quote_excerpt",
+            "template": "quote_excerpt",
+            "layout_mode": "split",
+            "split_height": 920,
+            "kicker": "William Stanley Jevons (1865)  •  The Coal Question, Ch. VII",
+            "headline": "Greater efficiency makes energy cheaper, triggering exponential demand rather than conservation.",
+            "title": "JEVONS PARADOX (1865)",
+            "badge": "JEVONS 1865",
+            "doc_title": "THE COAL QUESTION  •  MACMILLAN & CO. (1865)",
+            "quote_lines": [
+                '"It is wholly a confusion of ideas',
+                'to suppose that the economical',
+                'use of fuel is equivalent to a',
+                'diminished consumption..."'
+            ],
+            "quote_footer": "— W. S. Jevons, Ch. VII: Of the Economy of Fuel (1865)",
+            "highlights": [
+                ["economical", t_h1],
+                ["diminished consumption", t_h2]
+            ],
+            "citation": {
+                "journal": "MACMILLAN & CO. (1865) • CHAPTER VII",
+                "title": "The Coal Question: An Inquiry Concerning the Progress of the Nation",
+                "authors": "William Stanley Jevons"
+            },
+            "start_time": t_jevons,
+            "end_time": round(max(t_jevons + 11.5, t_cmp - 0.15), 2)
+        },
+        {
+            "beat_id": 5,
+            "idea": "Commoditize Your Complement: Cheap Tokens Drive Value to Physical Bottlenecks",
+            "domain": "two_col_compare",
+            "template": "two_col_compare",
+            "layout_mode": "fullscreen",
+            "split_height": 0,
+            "kicker": "Joel Spolsky (2002) & Jevons (1865)  •  Commoditize Your Complement",
+            "headline": "Intelligence is becoming a low-margin commodity while pricing power flows to bottlenecks.",
+            "title": "COMMODITY VS BOTTLENECK",
+            "badge": "PRICING POWER",
+            "left_cfg": {
+                "header": "Low-Margin Commodity",
+                "big_title": "TOKENS",
+                "subtitle": "Price Crashing Toward Zero",
+                "items": [
+                    {"text": "-62% FRONTIER", "at": 1.2},
+                    {"text": "70%+ OPEN WEIGHTS", "at": 3.0},
+                    {"text": "THIN MARGINS", "at": 4.8},
+                ],
+            },
+            "right_cfg": {
+                "header": "Scarce Bottleneck",
+                "top_label": "Smart Routers & Ops",
+                "mid_label": "Real Execution",
+                "bot_big": "$6.60+",
+                "bot_sub": "Per Hr B200 Scarcity",
+            },
+            "citation": {
+                "journal": "JOEL ON SOFTWARE (2002)  •  STRATEGY LETTER V",
+                "title": "The Economics of Open Source (Commoditize Your Complement)",
+                "authors": "Joel Spolsky (2002) & Citadel Tokenomics 2.0 (2026)"
+            },
+            "start_time": t_cmp,
+            "end_time": round(min(max(t_cmp + 12.0, t_outro - 0.6), total_duration - 6.0), 2)
+        }
+    ]
+
+    valid_cues = []
+    safe_end_limit = max(12.0, total_duration - 5.5)
+    for c in cues:
+        st = round(max(3.5, float(c["start_time"])), 2)
+        if valid_cues and st <= valid_cues[-1]["end_time"] + 0.12:
+            st = round(valid_cues[-1]["end_time"] + 0.15, 2)
+        raw_en = float(c["end_time"])
+        en = round(min(safe_end_limit, min(st + 25.0, max(st + 6.0, raw_en))), 2)
+        if en - st >= 5.2 and st < safe_end_limit - 3.5:
+            c["start_time"] = st
+            c["end_time"] = en
+            c["duration"] = round(en - st, 2)
+            c["animation_type"] = c["template"]
+            c["custom_render"] = True
+            valid_cues.append(c)
+
+    return valid_cues
+
+
 def plan_storyboard(transcript_data, lang="en", use_ai=True):
     segments = transcript_data.get("segments", [])
     total_duration = float(transcript_data.get("duration", 25.0))
@@ -693,21 +883,57 @@ def plan_storyboard(transcript_data, lang="en", use_ai=True):
 
     full_text = (" ".join(s.get("text", "") for s in segments) + " " + str(transcript_data.get("reference_script", ""))).lower()
 
+    is_tokenomics = any(k in full_text for k in [
+        "tokenomics", "citadel", "jevons", "b200", "vercel", "smart routers",
+        "توكنوميكس", "سيتاديل", "جيفونز", "روتورات", "فيرسيل", "بي ميتين", "توكنز"
+    ])
     is_unemployment = any(k in full_text for k in [
         "unemployment", "jobless", "hysteresis", "bureau of labor",
         "بطالة", "تجميد التوظيف", "تآكل المهارات", "مكتب إحصائيات"
-    ])
+    ]) and not is_tokenomics
     is_false_needs = any(k in full_text for k in [
         "marcuse", "one-dimensional", "brickman", "kasser", "bauer", "false needs",
         "ماركوز", "احتياجات مزيفة", "دولاب التعود", "تيم كاسر", "الجانب المظلم", "مونيكا باور"
-    ])
+    ]) and not is_tokenomics
     is_money_happiness = any(k in full_text for k in [
         "kahneman", "killingsworth", "hedonic", "كانيمان", "كوستاريكا", "لوغاريتمية"
-    ]) and not is_unemployment and not is_false_needs
+    ]) and not is_unemployment and not is_false_needs and not is_tokenomics
 
     post_metadata = {}
     credit_usage = {}
     semantic_highlights = {}
+
+    if is_tokenomics:
+        print(f"[storyboard_planner] Planning Step 2 Beat Map for Tokenomics 2.0 & Jevons Paradox ({lang})!")
+        cues = build_tokenomics_storyboard(all_words, total_duration, lang=lang)
+        t_hook_st = find_word_timestamp(all_words, ["crashing", "commodity", "160-year-old", "كيطيح", "كل نهار", "الذكاء"], 1.0, min_t=0.4)
+        if t_hook_st > 4.5:
+            t_hook_st = 1.0
+        semantic_highlights = {
+            "hook_stamp": {
+                "badge": "CITADEL SECURITIES  •  TOKENOMICS 2.0",
+                "title": "AI PRICE CRASH: -62%",
+                "start_time": round(t_hook_st, 2),
+                "end_time": round(min(cues[0]["start_time"] - 0.8, t_hook_st + 9.0), 2) if cues else 8.5,
+            }
+        }
+        if lang in ["ary", "darija", "moroccan"]:
+            post_metadata = {
+                "post_title": "علاش ثمن الذكاء الاصطناعي طاح بـ 62% و الكارطات (B200 GPUs) زادو غلاو؟ (مفارقة جيفونز 1865)",
+                "caption": "الثمن ديال الذكاء الاصطناعي كينزل بواحد السرعة تاريخية، ولكن الهاردوير اللي كيخدمو كيزيد يغلى كل سيمانة!\n\nتقرير Citadel Securities (Tokenomics 2.0 — أكتوبر 2026) كيشرح هاد اللغز الاقتصادي بالأرقام:\n[1] انهيار أسعار التوكنز: الثمن المرجح طاح بـ 50% والـ Frontier Models رخاصو بـ 62% فـ 6 أشهر فقط.\n[2] الموديلات المفتوحة والروتاج الذكي: بيانات Vercel AI Gateway كتأكد صعود Open-Weight Models من 13% لـ أكثر من 70% من الحجم، بـ أقل من 25% من الميزانية.\n[3] ندرة الهاردوير: نفس الفترة شهدات صعود كراء B200 GPUs من $4.20/hr لـ أكثر من $6.60/hr.\n\nالسبب كيرجع لـ 1865: مفارقة جيفونز (Jevons Paradox) — فاش كيرخاص مورد استراتيجي، الطلب الإجمالي كينفجر أضعاف مضاعفة.\n\nالمصادر:\n• Citadel Securities Macro Strategy — Tokenomics 2.0 (Oct 2026)\n• Vercel AI Gateway & Silicon Data (B200 GPU Term Rental Index)\n• William Stanley Jevons (1865) — The Coal Question (Ch. VII)\n• Joel Spolsky (2002) — Commoditize Your Complement",
+                "save_cta": "خبي هاد الفيديو باش تركز فالكاريير ديالك على النقطة اللي فيها الخصاص ماشي السلعة اللي كترخاص للزيرو.",
+                "pinned_comment": "واش كتشوف بلي القيمة الحقيقية دابا فـ البنية التحتية والروتاج الذكي ولا فـ الموديلات؟ شاركنا رأيك.",
+                "hashtags": ["#المغرب", "#الدارجة", "#ذكاء_اصطناعي", "#تكنولوجيا", "#اقتصاد", "#استثمار", "#تطوير_الذات", "#برمجة", "#بيزنس", "#جيفيونز"]
+            }
+        else:
+            post_metadata = {
+                "post_title": "Why AI Token Prices Crashed 62% While B200 GPUs Surged Above $6.60/hr (Tokenomics 2.0 & Jevons Paradox)",
+                "caption": "Raw AI intelligence is crashing in price faster than almost any commodity in history—yet the hardware running it keeps getting more expensive every week.\n\nCitadel Securities' October 2026 Tokenomics 2.0 report explains the exact economic law behind it:\n[1] Token Collapse: Consumption-weighted token prices fell 50% in six months while frontier average prices plunged 62%.\n[2] Smart Routers & Open Weights: Vercel AI Gateway data shows open-weight models jumped from ~13% of token volume (Dec 2025) to >70% (Sep 2026) on less than 25% of spend.\n[3] Hardware Scarcity: Over the exact same 2026 window, B200 GPU rental rates surged from ~$4.20/hr in January to over $6.60/hr in October.\n\nEconomist William Stanley Jevons explained this in 1865 (The Coal Question): when unit costs plunge, total consumption explodes. Value flows away from the commodity toward physical compute, smart routing, and execution bottlenecks.\n\nSources:\n• Citadel Securities Macro Strategy — \"Tokenomics 2.0\" (Oct 2026)\n• Vercel AI Gateway & Silicon Data (B200 Term Rental Rate Index)\n• William Stanley Jevons (1865) — The Coal Question\n• Joel Spolsky (2002) — \"Commoditize Your Complement\"",
+                "save_cta": "Save this reel so you build at the bottleneck that cheap AI makes more valuable.",
+                "pinned_comment": "Where do you see the biggest bottleneck in AI right now: GPUs, smart model routing, or workflow execution?",
+                "hashtags": ["#ai", "#artificialintelligence", "#jevonsParadox", "#tokenomics", "#macroeconomics", "#nvidia", "#opensource", "#techstrategy", "#startups", "#softwareengineering"]
+            }
+        return cues, post_metadata, credit_usage, semantic_highlights
 
     if is_unemployment:
         print(f"[storyboard_planner] Planning Step 2 Beat Map for The Hidden Unemployment Crisis ({lang})!")
